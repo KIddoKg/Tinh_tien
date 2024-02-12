@@ -1,7 +1,10 @@
 import 'package:Xi_Zach/contact.dart';
+import 'package:Xi_Zach/home_screen_2.dart';
 import 'package:Xi_Zach/router.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
+
+import 'home_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -31,17 +34,18 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 ElevatedButton(
                     onPressed: () {
-                      //
-                      Navigator.of(context)
-                          .pushNamed(RouteGenerator.xizach);
-                      },
-                      //
-
+            //
+            Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => HomePage(),
+        ));
+          //
+      },
                     child: const Text('Xi Zach')),
                 ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context)
-                          .pushNamed(RouteGenerator.tienlen);
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => HomeScreen2(),
+                      ));
                       //
                     },
                     child: const Text('Tien Len')),

@@ -45,6 +45,36 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
   marquee: ^2.2.3
+  intl:
+  shared_preferences: ^2.2.0
+  provider: ^5.0.0
+  fluttertoast: ^8.2.2
+  date_picker_timeline: ^1.2.0
+  syncfusion_flutter_datepicker: ^22.2.7
+  file_picker: ^5.2.0
+  # geocoding: ^2.0.0
+  mask_text_input_formatter: ^2.5.0
+  modal_bottom_sheet: ^3.0.0-pre
+  flutter_bloc:
+  lottie:
+  dio:
+  curl_logger_dio_interceptor: ^1.0.0
+  pretty_dio_logger:
+  geolocator:
+  notification_center:
+  permission_handler:
+  svg_flutter:
+  cached_network_image:
+  flutter_multi_formatter: ^2.12.4
+  flutter_custom_clippers:
+  animate_do:
+  carousel_slider:
+  animator: ^3.2.0
+  flex_grid: ^5.1.0
+  animated_text_kit: ^4.2.1
+  flutter_spinkit:
+  quickalert: ^1.0.1
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -57,9 +87,11 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/images/
+    - assets/images/questions/
+    - assets/t-images/
+    - assets/svg/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

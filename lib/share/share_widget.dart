@@ -935,7 +935,6 @@ Future<void> showAlertIOS(BuildContext context, String title, String message, {b
                         Navigator.pop(context);
                       }
                       onTap();
-
                       Navigator.pop(context);
                     }),
 

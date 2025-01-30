@@ -1209,6 +1209,7 @@ if(hasData) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),  // Biểu tượng nút quay lại
@@ -1450,7 +1451,7 @@ if(hasData) {
                     contacts.removeAt(index);
                     _saveContacts(); // Lưu dữ liệu khi xóa
                   });
-                  Navigator.of(context).pop();
+                  // Navigator.of(context).pop();
                 });
               },
               backgroundColor: const Color(0xFFFE4A49),

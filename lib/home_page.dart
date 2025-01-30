@@ -1133,22 +1133,22 @@ class _HomePageState extends State<HomePage> {
   Future<void> _showStartGameDialog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool hasData = prefs.containsKey('contacts'); // Kiểm tra có bản ghi cũ không
-if(hasData) {
-  showAlertIOS(
-      context,
-      "Thông báo",
-      "Bạn muốn sử dụng bản ghi cũ ?",
-      autoPop: false,
-      onTapLeft: () {
-        _clearContacts();
-      },
-      onTap: () {
-        if (hasData) {
-          _loadContacts();
-        }
-      },
-    );
-}
+    if (hasData) {
+      showAlertIOS(
+        context,
+        "Thông báo",
+        "Bạn muốn sử dụng bản ghi cũ ?",
+        autoPop: false,
+        onTapLeft: () {
+          _clearContacts();
+        },
+        onTap: () {
+          if (hasData) {
+            _loadContacts();
+          }
+        },
+      );
+    }
     // showDialog<String>(
     //   context: context,
     //   builder: (BuildContext context) {
@@ -1212,12 +1212,11 @@ if(hasData) {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),  // Biểu tượng nút quay lại
+          icon: const Icon(Icons.arrow_back), // Biểu tượng nút quay lại
           onPressed: () {
             showAlertIOS(context, "Thông báo", "Dữ liệu sẽ tự động lưu. Bạn có muốn thoát ?", onTap: () {
               Navigator.pop(context);
             });
-
           },
         ),
         centerTitle: true,
@@ -1238,7 +1237,8 @@ if(hasData) {
                       hintText: 'Xin cái Tên',
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0), // Điều chỉnh chiều cao
+                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      // Điều chỉnh chiều cao
                       enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.green, width: 1.0),
                           borderRadius: BorderRadius.all(
@@ -1252,10 +1252,11 @@ if(hasData) {
                     ),
                   ),
                 ),
-                SizedBox(width: 8,)
-                ,Container(
+                SizedBox(
+                  width: 8,
+                ),
+                Container(
                   height: 46,
-
                   decoration: BoxDecoration(
                     color: Colors.white, // Màu nền của container
                     borderRadius: BorderRadius.all(Radius.circular(10.0)), // Bo tròn tất cả các góc
@@ -1276,7 +1277,6 @@ if(hasData) {
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
             TextField(
               controller: moneyController,
@@ -1301,13 +1301,13 @@ if(hasData) {
             const SizedBox(height: 10),
             contacts.isEmpty
                 ? Expanded(
-                  child: Center(
-                    child: const Text(
+                    child: Center(
+                      child: const Text(
                         'Éo có người chơi..',
                         style: TextStyle(fontSize: 22, color: Colors.white),
                       ),
-                  ),
-                )
+                    ),
+                  )
                 : Expanded(
                     child: ListView.builder(
                       itemCount: contacts.length,
@@ -1463,7 +1463,6 @@ if(hasData) {
         ),
         child: Container(
           color: Colors.white,
-
           child: Card(
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -1530,34 +1529,32 @@ if(hasData) {
                       },
                       icon: const Icon(Icons.add_circle_outline, size: 28.0),
                     ),
-              Spacer(),
-              Flexible(
-                          child: InkWell(
-                              onTap: () {
-                                //
-                                nameController.text = contacts[index].name;
-                                contactController.text = "${contacts[index].contact}";
-                                String name = nameController.text.trim();
-                                String contact = contactController.text.trim();
+                    Spacer(),
+                    IconButton(
+                      onPressed: () {
+                        //
+                        nameController.text = contacts[index].name;
+                        contactController.text = "${contacts[index].contact}";
+                        String name = nameController.text.trim();
+                        String contact = contactController.text.trim();
 
-                                // assert(myInt is int);
-                                if (name.isNotEmpty && contact.isNotEmpty) {
-                                  setState(() {
-                                    // myInt++;
-                                    selectedIndex = index;
-                                    nameController.text = '';
-                                    contactController.text = '';
-                                    contacts[selectedIndex].name = name;
-                                    contacts[selectedIndex].contact += 2;
-                                    contacts[0].contact -= 2;
-                                    selectedIndex = -1;
-                                  });
-                                }
-                                //
-                              },
-                              child: const Icon(Icons.exposure_plus_2, size: 28.0,)),
-                        ),
-
+                        // assert(myInt is int);
+                        if (name.isNotEmpty && contact.isNotEmpty) {
+                          setState(() {
+                            // myInt++;
+                            selectedIndex = index;
+                            nameController.text = '';
+                            contactController.text = '';
+                            contacts[selectedIndex].name = name;
+                            contacts[selectedIndex].contact += 2;
+                            contacts[0].contact -= 2;
+                            selectedIndex = -1;
+                          });
+                        }
+                        //
+                      },
+                      icon: const Icon(Icons.exposure_plus_2, size: 28.0),
+                    ),
                   ],
                 ),
               ),

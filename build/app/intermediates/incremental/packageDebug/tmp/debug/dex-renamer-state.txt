@@ -1,4 +1,0 @@
-#Sat Jan 21 16:20:52 ICT 2023
-base.0=D\:\\Mobile\\sem1-3\\Mobile-app\\contacts_list_app-main\\contacts_list_app-main\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
-renamed.0=classes.dex
-path.0=classes.dex

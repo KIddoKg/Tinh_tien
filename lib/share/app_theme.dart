@@ -11,18 +11,18 @@ class AppTheme {
     primaryColor: colorScheme.primary,
     fontFamily: fontFamily,
     textTheme: TextTheme(
-      headline1: TextStyle(fontWeight: _bold, fontSize: 48, color: onBg),
-      headline2: TextStyle(fontWeight: _bold, fontSize: 38, color: onBg),
-      headline3: TextStyle(fontWeight: _semiBold, fontSize: 32, color: onBg),
-      headline4: TextStyle(fontWeight: _semiBold, fontSize: 24, color: onBg),
-      headline5: TextStyle(fontWeight: _medium, fontSize: 20, color: onBg),
-      headline6: TextStyle(fontWeight: _regular, fontSize: 18, color: onBg),
+      displayLarge: TextStyle(fontWeight: _bold, fontSize: 48, color: onBg),
+      displayMedium: TextStyle(fontWeight: _bold, fontSize: 38, color: onBg),
+      displaySmall: TextStyle(fontWeight: _semiBold, fontSize: 32, color: onBg),
+      headlineMedium: TextStyle(fontWeight: _semiBold, fontSize: 24, color: onBg),
+      headlineSmall: TextStyle(fontWeight: _medium, fontSize: 20, color: onBg),
+      titleLarge: TextStyle(fontWeight: _regular, fontSize: 18, color: onBg),
       //
-      bodyText1: const TextStyle(fontWeight: _regular, fontSize: 16),
-      bodyText2: const TextStyle(fontWeight: _bold, fontSize: 16),
+      bodyLarge: const TextStyle(fontWeight: _regular, fontSize: 16),
+      bodyMedium: const TextStyle(fontWeight: _bold, fontSize: 16),
       //
-      caption: const TextStyle(fontWeight: _semiBold, fontSize: 16),
-      button: const TextStyle(fontWeight: _bold, fontSize: 18),
+      bodySmall: const TextStyle(fontWeight: _semiBold, fontSize: 16),
+      labelLarge: const TextStyle(fontWeight: _bold, fontSize: 18),
       //
     ),
   );

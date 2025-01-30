@@ -36,14 +36,8 @@ class ButtonColor extends StatelessWidget {
         width: double.infinity,
         height: height,
         decoration: BoxDecoration(
-            color: backgroundColor == Colors.transparent
-                ? AppColors.primaryColor
-                : backgroundColor,
-            border: Border.all(
-                width: 1,
-                color: backgroundColor == Colors.transparent
-                    ? AppColors.primaryColor
-                    : backgroundColor!),
+            color: backgroundColor == Colors.transparent ? AppColors.primaryColor : backgroundColor,
+            border: Border.all(width: 1, color: backgroundColor == Colors.transparent ? AppColors.primaryColor : backgroundColor!),
             borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -51,10 +45,7 @@ class ButtonColor extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: !isSelected ? Colors.white : AppColors.primaryColor,
-                  fontSize: fontSize,
-                  fontWeight: fontWeight),
+              style: TextStyle(color: !isSelected ? Colors.white : AppColors.primaryColor, fontSize: fontSize, fontWeight: fontWeight),
             ),
           ),
         ),
@@ -70,8 +61,7 @@ class Wave extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipPath(
       clipper: WaveClipperTwo(flip: true, reverse: true),
-      child: Container(
-          height: 50, width: double.infinity, color: AppColors.secondColor),
+      child: Container(height: 50, width: double.infinity, color: AppColors.secondColor),
     );
   }
 }
@@ -93,8 +83,7 @@ class TextFieldNormal extends StatelessWidget {
     return SizedBox(
       height: 80,
       child: Padding(
-        padding:
-            const EdgeInsets.only(top: 18.0, left: 8.0, right: 8.0, bottom: 10),
+        padding: const EdgeInsets.only(top: 18.0, left: 8.0, right: 8.0, bottom: 10),
         child: TextField(
           // textAlignVertical: TextAlignVertical.center,
           readOnly: lock,
@@ -152,8 +141,7 @@ class TextFiledWeb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0, bottom: 20),
+      padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0, bottom: 20),
       child: TextFormField(
         readOnly: lock,
         enableInteractiveSelection: false,
@@ -212,11 +200,7 @@ class Shadow extends StatelessWidget {
   Offset direction;
   double radius;
 
-  Shadow(
-      {super.key,
-      required this.child,
-      this.direction = Offset.zero,
-      this.radius = 0});
+  Shadow({super.key, required this.child, this.direction = Offset.zero, this.radius = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -268,8 +252,7 @@ class CustomStack extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             width: 250,
             height: 380,
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
               child: Column(
@@ -292,17 +275,11 @@ class CustomStack extends StatelessWidget {
                           children: [
                             Text(
                               text1,
-                              style: const TextStyle(
-                                  color: Color(0xff2D2D2D),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20),
+                              style: const TextStyle(color: Color(0xff2D2D2D), fontWeight: FontWeight.bold, fontSize: 20),
                             ),
                             Text(
                               text2,
-                              style: TextStyle(
-                                  color: color,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15),
+                              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 15),
                             ),
                           ],
                         ),
@@ -334,8 +311,7 @@ class Room extends StatelessWidget {
     return InkWell(
       onTap: () {
         // Navigator.of(context).pushNamed(AppRoute.welcome);
-        showAlert(context, 'Thông báo',
-            'Phần này đang làm nha, đang lười qué');
+        showAlert(context, 'Thông báo', 'Phần này đang làm nha, đang lười qué');
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -355,22 +331,19 @@ class Room extends StatelessWidget {
                   Positioned(
                     left: 40,
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://john-mohamed.com/wp-content/uploads/2018/05/Profile_avatar_placeholder_large.png'),
+                      backgroundImage: NetworkImage('https://john-mohamed.com/wp-content/uploads/2018/05/Profile_avatar_placeholder_large.png'),
                       radius: 25,
                     ),
                   ),
                   Positioned(
                     left: 20,
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://as1.ftcdn.net/v2/jpg/02/88/79/62/1000_F_288796275_NAlmJ0IESWj9EpsuVcSRnOAA79wPCQPQ.jpg'),
+                      backgroundImage: NetworkImage('https://as1.ftcdn.net/v2/jpg/02/88/79/62/1000_F_288796275_NAlmJ0IESWj9EpsuVcSRnOAA79wPCQPQ.jpg'),
                       radius: 25,
                     ),
                   ),
                   CircleAvatar(
-                    backgroundImage: NetworkImage(
-                        'https://images.fineartamerica.com/images-medium-5/lost-astronaut-roberta-ferreira.jpg'),
+                    backgroundImage: NetworkImage('https://images.fineartamerica.com/images-medium-5/lost-astronaut-roberta-ferreira.jpg'),
                     radius: 25,
                   ),
                 ],
@@ -390,10 +363,7 @@ class Room extends StatelessWidget {
                 ),
                 Text(
                   'Tạo phòng chơi ZiZach nào',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff767070)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xff767070)),
                 ),
               ],
             )
@@ -430,10 +400,7 @@ class AppBarCus extends StatelessWidget implements PreferredSizeWidget {
 // color: Colors.white,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-              colors: [
-                AppColors.primaryColor,
-                AppColors.primaryColor.withOpacity(0.1)
-              ],
+              colors: [AppColors.primaryColor, AppColors.primaryColor.withOpacity(0.1)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               stops: [0.1, 10.0]),
@@ -455,10 +422,7 @@ class AppBarCus extends StatelessWidget implements PreferredSizeWidget {
                     const Spacer(),
                     Text(
                       title,
-                      style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.lightNeutral5),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.lightNeutral5),
                     ),
                     const Spacer(),
                     if (actions == null)
@@ -483,6 +447,7 @@ class AppBarCus extends StatelessWidget implements PreferredSizeWidget {
         MediaQuery.of(context).size.height * 0.07 + 20,
       );
 }
+
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final BuildContext context;
@@ -497,7 +462,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.extendBody,
     this.leading,
     this.actions,
-    this.bottom, required this.context,
+    this.bottom,
+    required this.context,
   }) : super(key: key);
 
   @override
@@ -510,10 +476,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                AppColors.primaryColor,
-                AppColors.primaryColor.withOpacity(0.1)
-              ],
+              colors: [AppColors.primaryColor, AppColors.primaryColor.withOpacity(0.1)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               stops: [0.1, 10.0],
@@ -553,8 +516,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(
-    MediaQuery.of(context).size.height * 0.07 + 20,
-  );
+        MediaQuery.of(context).size.height * 0.07 + 20,
+      );
 }
 
 class HorizontalListView extends StatelessWidget {
@@ -577,7 +540,7 @@ class HorizontalListView extends StatelessWidget {
       child: Shadow(
         radius: 16,
         child: InkWellCir(
-          onTap: (){
+          onTap: () {
             onTap?.call();
           },
           child: Padding(
@@ -593,8 +556,7 @@ class HorizontalListView extends StatelessWidget {
                       height: 35,
                       decoration: BoxDecoration(
                         color: AppColors.sixColor.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(
-                            10.0), // Set your desired border radius
+                        borderRadius: BorderRadius.circular(10.0), // Set your desired border radius
                       ),
                       child: Row(
                         children: [
@@ -613,21 +575,14 @@ class HorizontalListView extends StatelessWidget {
                               child: Center(
                                   child: Text(
                                 "$index",
-                                style: TextStyle(
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white),
+                                style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: Colors.white),
                               ))),
                           Padding(
                             padding: const EdgeInsets.only(left: 8.0),
                             child: Center(
                                 child: Text(
-                              int.parse(time)
-                                  .toDateString(format: 'hh:mm dd/MM/yyyy'),
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black45,
-                                  fontWeight: FontWeight.w600),
+                              int.parse(time).toDateString(format: 'hh:mm dd/MM/yyyy'),
+                              style: TextStyle(fontSize: 16, color: Colors.black45, fontWeight: FontWeight.w600),
                             )),
                           ),
                         ],
@@ -638,16 +593,13 @@ class HorizontalListView extends StatelessWidget {
                       child: Container(
                           decoration: BoxDecoration(
                             color: AppColors.sixColor.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(
-                                10.0), // Set your desired border radius
+                            borderRadius: BorderRadius.circular(10.0), // Set your desired border radius
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
                               "Đã kết thúc",
-                              style: TextStyle(
-                                  color: AppColors.primaryRedOr,
-                                  fontWeight: FontWeight.w500),
+                              style: TextStyle(color: AppColors.primaryRedOr, fontWeight: FontWeight.w500),
                             ),
                           )),
                     )
@@ -679,15 +631,12 @@ class HorizontalListView extends StatelessWidget {
                                     // Set your desired border color
                                     width: 2.0, // Set your desired border width
                                   ),
-                                  borderRadius: BorderRadius.circular(
-                                      10.0), // Set your desired border radius
+                                  borderRadius: BorderRadius.circular(10.0), // Set your desired border radius
                                 ),
                                 child: Center(
                                   child: Text(
                                     'Item ${data[dataIndex]}',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16),
+                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                                   ),
                                 ),
                               );
@@ -715,12 +664,7 @@ class InkWellCir extends StatelessWidget {
   double radius;
   bool sameColor;
 
-  InkWellCir(
-      {super.key,
-      required this.child,
-      this.radius = 16,
-      this.onTap,
-      this.sameColor = false});
+  InkWellCir({super.key, required this.child, this.radius = 16, this.onTap, this.sameColor = false});
 
   @override
   Widget build(BuildContext context) {
@@ -729,11 +673,9 @@ class InkWellCir extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
           borderRadius: BorderRadius.circular(radius),
-          splashColor:
-              !sameColor ? AppColors.primaryColor.withOpacity(0.2) : null,
+          splashColor: !sameColor ? AppColors.primaryColor.withOpacity(0.2) : null,
 // Màu sẽ xuất hiện khi nhấn và giữ
-          highlightColor:
-              !sameColor ? AppColors.primaryColor.withOpacity(0.2) : null,
+          highlightColor: !sameColor ? AppColors.primaryColor.withOpacity(0.2) : null,
           onTap: () {
             onTap?.call();
           },
@@ -754,14 +696,17 @@ class AnimatedToggle extends StatefulWidget {
   final double width;
   final double size;
 
-
   AnimatedToggle({
     required this.values,
     this.lock = false,
     required this.onToggleCallback,
     this.backgroundColor = const Color(0xFFe7e7e8),
     required this.buttonColor,
-    this.textColor = const Color(0xFF000000), this.valueChoose = false,  this.height=10,  this.width =10, this.size = 450,
+    this.textColor = const Color(0xFF000000),
+    this.valueChoose = false,
+    this.height = 10,
+    this.width = 10,
+    this.size = 450,
   });
 
   @override
@@ -769,15 +714,14 @@ class AnimatedToggle extends StatefulWidget {
 }
 
 class _AnimatedToggleState extends State<AnimatedToggle> {
-  late bool initialPosition =  widget.valueChoose ? true: false;
+  late bool initialPosition = widget.valueChoose ? true : false;
 
   @override
   Widget build(BuildContext context) {
-
     double size = widget.size;
     return Container(
-      width: size*0.6,
-      height:widget.height,
+      width: size * 0.6,
+      height: widget.height,
       margin: EdgeInsets.all(20),
       child: Stack(
         children: <Widget>[
@@ -807,7 +751,7 @@ class _AnimatedToggleState extends State<AnimatedToggle> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   widget.values.length,
-                      (index) => Padding(
+                  (index) => Padding(
                     padding: EdgeInsets.symmetric(horizontal: size * 0.08),
                     child: Container(
                       alignment: Alignment.center,
@@ -817,7 +761,6 @@ class _AnimatedToggleState extends State<AnimatedToggle> {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xAA000000),
-
                         ),
                       ),
                     ),
@@ -829,11 +772,10 @@ class _AnimatedToggleState extends State<AnimatedToggle> {
           AnimatedAlign(
             duration: const Duration(milliseconds: 250),
             curve: Curves.decelerate,
-            alignment:
-            initialPosition ? Alignment.centerLeft : Alignment.centerRight,
+            alignment: initialPosition ? Alignment.centerLeft : Alignment.centerRight,
             child: Container(
               width: size * 0.33,
-              height:widget.height,
+              height: widget.height,
               decoration: ShapeDecoration(
                 color: widget.buttonColor,
                 shape: RoundedRectangleBorder(
@@ -857,10 +799,8 @@ class _AnimatedToggleState extends State<AnimatedToggle> {
   }
 }
 
-Future<dynamic> showAlertAction(
-    BuildContext context, String title, String message, Function()? onTap,
-    {List<CupertinoButton>? actions,
-      List<ElevatedButton>? actionAndroids}) async {
+Future<dynamic> showAlertAction(BuildContext context, String title, String message, Function()? onTap,
+    {List<CupertinoButton>? actions, List<ElevatedButton>? actionAndroids}) async {
   return showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -883,9 +823,9 @@ Future<dynamic> showAlertAction(
     ),
   );
 }
+
 Future<dynamic> showAlert(BuildContext context, String title, String message,
-    {List<CupertinoButton>? actions,
-      List<ElevatedButton>? actionAndroids}) async {
+    {List<CupertinoButton>? actions, List<ElevatedButton>? actionAndroids}) async {
   return showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -940,28 +880,71 @@ class _InkwellCirTapState extends State<InkwellCirTap> {
 
 Future<bool> onWilldPop(BuildContext context) async {
   return await showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Are you sure?'),
-      content: Text('Do you want to exit the app?'),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text('No'),
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Are you sure?'),
+          content: Text('Do you want to exit the app?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Yes'),
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: Text('Yes'),
-        ),
-      ],
-    ),
-  ) ?? false;
+      ) ??
+      false;
 }
 
 Future<bool> onBackPressed(BuildContext context) async {
   await showAlert(context, 'Thông báo', 'Đã chọn');
   // Return true or false based on your logic
   return true;
+}
+
+Future<void> showAlertIOS(BuildContext context, String title, String message, {bool? autoPop, void Function()? onTap, void Function()? onTapLeft}) async {
+  await showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              (onTapLeft != null)?
+                CupertinoButton(
+                    child: const Text('Không'),
+                    onPressed: () {
+                      if (autoPop == true) {
+                        Navigator.pop(context);
+                      }
+                      onTapLeft();
+                      Navigator.pop(context);
+                    })
+             : CupertinoButton(
+                  child: Text(onTap != null ? "Không" : "Đồng ý"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+              if (onTap != null)
+                CupertinoButton(
+                    child: const Text('Có'),
+                    onPressed: () {
+                      if (autoPop == true) {
+                        Navigator.pop(context);
+                      }
+                      onTap();
+
+                      Navigator.pop(context);
+                    }),
+
+            ],
+          ));
+
+  // if (onTap != null) {
+  //   onTap();
+  // }
 }
 
 void showExitDialog(BuildContext context) {
@@ -1002,8 +985,7 @@ void showExitDialog(BuildContext context) {
 }
 
 class LoadingDot extends StatelessWidget {
-  LoadingDot(
-      {super.key, this.text = 'Đang tải dữ liệu', this.style, this.linkLogo});
+  LoadingDot({super.key, this.text = 'Đang tải dữ liệu', this.style, this.linkLogo});
 
   String? text;
   TextStyle? style;
@@ -1013,31 +995,31 @@ class LoadingDot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (linkLogo != null)
-              Transform.scale(
-                  scale: 2,
-                  child: Image.network(
-                    linkLogo!,
-                    width: 40,
-                    height: 40,
-                  )),
-            ColorLoader3(
-              radius: 10,
-              dotRadius: 6.0,
-              centerDot: false,
-              dotColor2: AppColors.primaryColor,
-              dotColor: AppColors.primaryColor,
-              dotQuality: 8,
-            ),
-            Text(
-              text!,
-              style: style ?? const TextStyle(color: Colors.grey),
-            )
-          ],
-        ));
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (linkLogo != null)
+          Transform.scale(
+              scale: 2,
+              child: Image.network(
+                linkLogo!,
+                width: 40,
+                height: 40,
+              )),
+        ColorLoader3(
+          radius: 10,
+          dotRadius: 6.0,
+          centerDot: false,
+          dotColor2: AppColors.primaryColor,
+          dotColor: AppColors.primaryColor,
+          dotQuality: 8,
+        ),
+        Text(
+          text!,
+          style: style ?? const TextStyle(color: Colors.grey),
+        )
+      ],
+    ));
   }
 }
 
@@ -1046,18 +1028,13 @@ class ColorLoader2 extends StatefulWidget {
   final Color color2;
   final Color color3;
 
-  const ColorLoader2(
-      {super.key,
-        this.color1 = Colors.deepOrangeAccent,
-        this.color2 = Colors.yellow,
-        this.color3 = Colors.lightGreen});
+  const ColorLoader2({super.key, this.color1 = Colors.deepOrangeAccent, this.color2 = Colors.yellow, this.color3 = Colors.lightGreen});
 
   @override
   _ColorLoader2State createState() => _ColorLoader2State();
 }
 
-class _ColorLoader2State extends State<ColorLoader2>
-    with TickerProviderStateMixin {
+class _ColorLoader2State extends State<ColorLoader2> with TickerProviderStateMixin {
   late Animation<double> animation1;
   late Animation<double> animation2;
   late Animation<double> animation3;
@@ -1069,26 +1046,20 @@ class _ColorLoader2State extends State<ColorLoader2>
   void initState() {
     super.initState();
 
-    controller1 = AnimationController(
-        duration: const Duration(milliseconds: 1200), vsync: this);
+    controller1 = AnimationController(duration: const Duration(milliseconds: 1200), vsync: this);
 
-    controller2 = AnimationController(
-        duration: const Duration(milliseconds: 900), vsync: this);
+    controller2 = AnimationController(duration: const Duration(milliseconds: 900), vsync: this);
 
-    controller3 = AnimationController(
-        duration: const Duration(milliseconds: 2000), vsync: this);
+    controller3 = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
 
-    animation1 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-        parent: controller1,
-        curve: const Interval(0.0, 1.0, curve: Curves.linear)));
+    animation1 =
+        Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: controller1, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
 
-    animation2 = Tween<double>(begin: -1.0, end: 0.0).animate(CurvedAnimation(
-        parent: controller2,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeIn)));
+    animation2 =
+        Tween<double>(begin: -1.0, end: 0.0).animate(CurvedAnimation(parent: controller2, curve: const Interval(0.0, 1.0, curve: Curves.easeIn)));
 
-    animation3 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-        parent: controller3,
-        curve: const Interval(0.0, 1.0, curve: Curves.decelerate)));
+    animation3 =
+        Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: controller3, curve: const Interval(0.0, 1.0, curve: Curves.decelerate)));
 
     controller1.repeat();
     controller2.repeat();
@@ -1185,11 +1156,8 @@ class Arc2Painter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    Rect rect2 = Rect.fromLTWH(
-        0.0 + (0.2 * size.width) / 2,
-        0.0 + (0.2 * size.height) / 2,
-        size.width - 0.2 * size.width,
-        size.height - 0.2 * size.height);
+    Rect rect2 =
+        Rect.fromLTWH(0.0 + (0.2 * size.width) / 2, 0.0 + (0.2 * size.height) / 2, size.width - 0.2 * size.width, size.height - 0.2 * size.height);
 
     canvas.drawArc(rect2, 0.0, 0.5 * pi, false, p2);
     canvas.drawArc(rect2, 0.8 * pi, 0.6 * pi, false, p2);
@@ -1215,11 +1183,8 @@ class Arc3Painter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    Rect rect3 = Rect.fromLTWH(
-        0.0 + (0.4 * size.width) / 2,
-        0.0 + (0.4 * size.height) / 2,
-        size.width - 0.4 * size.width,
-        size.height - 0.4 * size.height);
+    Rect rect3 =
+        Rect.fromLTWH(0.0 + (0.4 * size.width) / 2, 0.0 + (0.4 * size.height) / 2, size.width - 0.4 * size.width, size.height - 0.4 * size.height);
 
     canvas.drawArc(rect3, 0.0, 0.9 * pi, false, p3);
     canvas.drawArc(rect3, 1.1 * pi, 0.8 * pi, false, p3);
@@ -1241,19 +1206,18 @@ class ColorLoader3 extends StatefulWidget {
 
   const ColorLoader3(
       {super.key,
-        this.radius = 30.0,
-        this.dotRadius = 3.0,
-        this.centerDot = true,
-        this.dotColor = Colors.white,
-        this.dotColor2 = Colors.yellow,
-        this.dotQuality = 0});
+      this.radius = 30.0,
+      this.dotRadius = 3.0,
+      this.centerDot = true,
+      this.dotColor = Colors.white,
+      this.dotColor2 = Colors.yellow,
+      this.dotQuality = 0});
 
   @override
   _ColorLoader3State createState() => _ColorLoader3State();
 }
 
-class _ColorLoader3State extends State<ColorLoader3>
-    with SingleTickerProviderStateMixin {
+class _ColorLoader3State extends State<ColorLoader3> with SingleTickerProviderStateMixin {
   late Animation<double> animation_rotation;
   late AnimationController controller;
 

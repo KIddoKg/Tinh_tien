@@ -5,6 +5,7 @@ import 'package:Xi_Zach/router/route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'home_screen.dart';
+import 'package:sizer/sizer.dart';
 import 'new_ver/screen/splash/splash_screen.dart';
 
 void main() async {
@@ -31,12 +32,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
-      title: 'App Tinh tien',
-      // theme: AppTheme.myThemeData,
-      // home: const WelcomeScreen(),
-      home: const SplashScreen(),
-      routes: AppRoute.routes,
+    return   Sizer(builder: (context, orientation, screenType) {
+        return MaterialApp(
+          title: 'App Tinh tien',
+          // theme: AppTheme.myThemeData,
+          // home: const WelcomeScreen(),
+          home: const SplashScreen(),
+          routes: AppRoute.routes,
+        );
+      }
     );
   }
 }

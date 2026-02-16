@@ -1,3 +1,7 @@
+import 'package:Xi_Zach/new_ver/screen/gameOne/set_money_widget.dart';
+import 'package:Xi_Zach/new_ver/screen/gameOne/set_point_own_widget.dart';
+import 'package:Xi_Zach/new_ver/screen/gameOne/set_point_wave_widget.dart';
+import 'package:Xi_Zach/new_ver/screen/gameOne/game_settings_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +27,7 @@ class _HomeZiZachState extends State<HomeZiZach> {
   TextEditingController test = TextEditingController();
   bool switchValue = false;
   FlexGridSource source = FlexGridSource();
-
-  List<String> status = ["Ăn", "Thua", "X2", "Đền"];
+  ScrollController _horizontalScrollController = ScrollController();
 
   List<int> calculateSumForEachList(List<List<int>> listOfLists) {
     if (listOfLists.isEmpty) {
@@ -48,14 +51,25 @@ class _HomeZiZachState extends State<HomeZiZach> {
 
   @override
   void initState() {
-    // initSt();
-    // loadListCharNew();
-    Provider.of<ZiZackController>(context, listen: false).initSt();
-    // TODO: implement initState
-
     super.initState();
+
+    // KHÔNG gọi initSt() nữa vì:
+    // 1. Nếu là game mới → đã gọi initSt() ở popup trước khi vào đây
+    // 2. Nếu là continue game → đã load data từ continueInProgressGame()
+    // Gọi initSt() ở đây sẽ GHI ĐÈ dữ liệu vừa load!
+
+    print('🎮 HomeZiZach initState - KHÔNG gọi initSt() để giữ dữ liệu');
+    final controller = Provider.of<ZiZackController>(context, listen: false);
+    print('   listCharNew: ${controller.listCharNew.length} người');
+    print('   point: ${controller.point.length} ván');
+    print('   listOfMaps: ${controller.listOfMaps.length} players');
   }
 
+  @override
+  void dispose() {
+    _horizontalScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,8 +107,34 @@ class _HomeZiZachState extends State<HomeZiZach> {
                         AppSVG.setting,
                         color: AppColors.primary,
                       ),
+                      tooltip: 'Cài đặt trò chơi',
                       onPressed: () {
-                        Navigator.pop(context);
+                        showGameSettingsDialog(context);
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  CircleAvatar(
+                    backgroundColor: AppColors.backgroundColor,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.bug_report,
+                        color: AppColors.primary,
+                      ),
+                      onPressed: () async {
+                        // In ra console để debug
+                        print('\n🔍 DEBUG: Checking game history...\n');
+                        await Provider.of<ZiZackController>(context,
+                                listen: false)
+                            .printGameHistory();
+                        Provider.of<ZiZackController>(context, listen: false)
+                            .printCurrentSession();
+
+                        // Hiển thị thông báo
+                        showAlert(context, 'Debug',
+                            'Đã in gameHistory ra console. Kiểm tra debug console để xem!');
                       },
                     ),
                   ),
@@ -105,53 +145,295 @@ class _HomeZiZachState extends State<HomeZiZach> {
                   CircleAvatar(
                     backgroundColor: AppColors.backgroundColor,
                     child: IconButton(
-                      icon: SvgPicture.asset(
-                        AppSVG.back,
+                      icon: Icon(
+                        Icons.emoji_events,
                         color: AppColors.primary,
                       ),
                       onPressed: () {
-                        Navigator.pop(context);
+                        if (result.point.isEmpty) {
+                          showAlert(context, 'Thông báo',
+                              'Chưa có ván nào để kết thúc!');
+                        } else {
+                          showEndGameDialog(context);
+                        }
                       },
                     ),
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  CircleAvatar(
-                    backgroundColor: AppColors.backgroundColor,
-                    child: IconButton(
-                      icon: SvgPicture.asset(
-                        AppSVG.setting,
-                        color: AppColors.primary,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
+                  const SizedBox(width: 10),
                 ],
               ),
+              // actions: Row(
+              //   children: [
+              //     CircleAvatar(
+              //       backgroundColor: AppColors.backgroundColor,
+              //       child: IconButton(
+              //         icon: SvgPicture.asset(
+              //           AppSVG.back,
+              //           color: AppColors.primary,
+              //         ),
+              //         onPressed: () {
+              //           Navigator.pop(context);
+              //         },
+              //       ),
+              //     ),
+              //     const SizedBox(
+              //       width: 10,
+              //     ),
+              //     CircleAvatar(
+              //       backgroundColor: AppColors.backgroundColor,
+              //       child: IconButton(
+              //         icon: SvgPicture.asset(
+              //           AppSVG.setting,
+              //           color: AppColors.primary,
+              //         ),
+              //         onPressed: () {
+              //           Navigator.pop(context);
+              //         },
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ),
-            body: Stack(
+            body: Column(
               children: [
-                SingleChildScrollView(
-                  child: Column(
+                // Banner hiển thị chế độ chơi
+                if (result.fOrc == 1 && result.limitValue > 0)
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      border: Border(
+                        bottom: BorderSide(color: Colors.blue[200]!, width: 1),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.info_outline,
+                            color: Colors.blue[700], size: 18),
+                        SizedBox(width: 8),
+                        Text(
+                          result.dOrv == 0
+                              ? 'Chế độ: Giới hạn ${result.limitValue} điểm'
+                              : 'Chế độ: Giới hạn ${result.limitValue} ván',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue[900],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Toàn bộ table với scroll đồng bộ
+                Expanded(
+                  child: Row(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            top: 4.0, left: 8.0, right: 8.0),
-                        child: Container(
-                          width: 500,
-                          height: result.listCharNew.length * 60 >
-                                  MediaQuery.of(context).size.height
-                              ? result.listCharNew.length * 60
-                              : MediaQuery.of(context).size.height,
-                          child: Row(
+                      // Cột label bên trái (cố định)
+                      Column(
+                        children: [
+                          // Header "Tên:"
+                          Container(
+                            height: 60,
+                            width: 60,
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                "Tên:",
+                                style: TextStyle(
+                                    fontSize: 17,
+                                    color: AppColors.primaryColor,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                          ),
+                          // Các label "Ván X"
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: result.point
+                                    .asMap()
+                                    .entries
+                                    .map((vanEntry) {
+                                  final int vanIndex = vanEntry.key;
+                                  return Container(
+                                    height: 60,
+                                    width: 60,
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Center(
+                                      child: Text(
+                                        "Ván ${vanIndex + 1}:",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: AppColors.primaryColor,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                          // Label "Tổng:"
+                          if (result.showTotalScore)
+                            Container(
+                              height: 60,
+                              width: 60,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                  "Tổng:",
+                                  style: TextStyle(
+                                      fontSize: 17,
+                                      color: AppColors.primaryColor,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      // Cột dữ liệu scroll ngang
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: _horizontalScrollController,
+                          scrollDirection: Axis.horizontal,
+                          child: Column(
                             children: [
-                              generateColumn(Colors.red, result.listCharNew, 0),
-                              generateDynamicColumns(Colors.blue, result.point),
-                              generateColumnInt(Colors.red,
-                                  calculateSumForEachList(result.point), -1),
+                              // Hàng tên người chơi
+                              Container(
+                                height: 60,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Row(
+                                  children: result.listCharNew
+                                      .asMap()
+                                      .entries
+                                      .map((entry) {
+                                    final int index = entry.key;
+                                    final String name = entry.value;
+                                    return Container(
+                                      width: 80,
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 2.0),
+                                      decoration: BoxDecoration(
+                                        color: result.listOfMaps[index]
+                                                    ['cai'] ==
+                                                false
+                                            ? AppColors.sixColor
+                                            : AppColors.primaryColor,
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 2.0,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          name,
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: AppColors.whiteBg,
+                                              fontWeight: FontWeight.w700),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              // Các hàng điểm
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: result.point
+                                        .asMap()
+                                        .entries
+                                        .map((vanEntry) {
+                                      final List<int> vanScores =
+                                          vanEntry.value;
+                                      return Container(
+                                        height: 60,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 4.0),
+                                        child: Row(
+                                          children: vanScores
+                                              .asMap()
+                                              .entries
+                                              .map((scoreEntry) {
+                                            final int score = scoreEntry.value;
+                                            return Container(
+                                              width: 80,
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 2.0),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.sixColor,
+                                                border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 2.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  score == 0 ? "0" : "$score",
+                                                  style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: AppColors.whiteBg,
+                                                      fontWeight:
+                                                          FontWeight.w700),
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
+                              // Hàng tổng điểm
+                              if (result.showTotalScore)
+                                Container(
+                                  height: 60,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: Row(
+                                    children:
+                                        calculateSumForEachList(result.point)
+                                            .asMap()
+                                            .entries
+                                            .map((entry) {
+                                      final int sum = entry.value;
+                                      return Container(
+                                        width: 80,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 2.0),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryColor,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 2.0,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            sum == 0 ? "0" : "$sum",
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: AppColors.whiteBg,
+                                                fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -159,581 +441,110 @@ class _HomeZiZachState extends State<HomeZiZach> {
                     ],
                   ),
                 ),
-                Positioned(
-                  bottom: 10,
-                  left: 20,
-                  right: 30,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Shadow(
-                          radius: 10,
-                          child: Container(
-                            height: 60,
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: InkWellCir(
-                                    onTap: () {
-                                      showPopupSetPoint(context);
-                                    },
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset(
-                                            AppSVG.cart,
-                                            color: AppColors.primary,
-                                          ),
-                                          Text(
-                                            'Section 1',
-                                            style: TextStyle(
-                                                color: AppColors.primaryColor),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: 2,
-                                  color: AppColors.thirdColor,
-                                ), // Add some spacing between the sections
-                                Expanded(
-                                  child: InkWellCir(
-                                    onTap: () {
-                                      showPopupSetAdd(context);
-                                    },
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset(
-                                            AppSVG.cart,
-                                            color: AppColors.primary,
-                                          ),
-                                          Text(
-                                            'Section 1',
-                                            style: TextStyle(
-                                                color: AppColors.primaryColor),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: 2,
-                                  color: AppColors.thirdColor,
-                                ), // Add some spacing between the sections
-                                Expanded(
-                                  child: InkWellCir(
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset(
-                                            AppSVG.cart,
-                                            color: AppColors.primary,
-                                          ),
-                                          Text(
-                                            'Section 1',
-                                            style: TextStyle(
-                                                color: AppColors.primaryColor),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+
+                // Bottom controls
+                Container(
+                  padding:
+                      EdgeInsets.only(bottom: 10, left: 20, right: 30, top: 10),
+                  child: Shadow(
+                    radius: 10,
+                    child: Container(
+                      height: 60,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-
-                    ],
-                  ),
-                ),
-              ],
-            )),
-      );
-    });
-  }
-
-  Future<BuildContext?> showPopupSetPoint(BuildContext context) {
-    return showModalBottomSheet(
-        isScrollControlled: true,
-        isDismissible: true,
-        context: context,
-        // isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => DraggableScrollableSheet(
-            initialChildSize: 0.85,
-            minChildSize: 0.85,
-            maxChildSize: 0.85,
-            expand: false,
-            builder: (_, controller) {
-              return StatefulBuilder(builder: (BuildContext context,
-                  StateSetter setState /*You can rename this!*/) {
-                return Consumer<ZiZackController>(
-                    builder: (context, result, child) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height * 0.75,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(25.0),
-                        topRight: Radius.circular(25.0),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            width: 60, // Độ rộng của hình chữ nhật
-                            height: 10, // Chiều cao của hình chữ nhật
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              // Màu nền của hình chữ nhật
-                              borderRadius:
-                                  BorderRadius.circular(20), // Bán kính bo tròn
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            height: 250,
-                            child: ListView(
-                              scrollDirection: Axis.vertical,
-                              children: [
-                                Column(
-                                  children: List.generate(
-                                    (result.listCharNew.length / 2).ceil(),
-                                    (rowIndex) => Row(
-                                      children: List.generate(
-                                        2,
-                                        (columnIndex) {
-                                          final index =
-                                              rowIndex * 2 + columnIndex;
-                                          return index <
-                                                  result.listCharNew.length
-                                              ? Expanded(
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      // Handle the container tap event here
-
-                                                      Provider.of<ZiZackController>(
-                                                              context,
-                                                              listen: false)
-                                                          .chooseCon(index);
-
-                                                      print(
-                                                          "Container $index tapped");
-                                                    },
-                                                    child: SizedBox(
-                                                      height: 70,
-                                                      child: Container(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        margin: const EdgeInsets
-                                                            .all(8.0),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: result
-                                                                      .selectedIndex ==
-                                                                  index
-                                                              ? AppColors
-                                                                  .primaryColor
-                                                              : AppColors
-                                                                  .sixColor
-                                                                  .withOpacity(
-                                                                      0.5),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10.0),
-                                                        ),
-                                                        child: Center(
-                                                          child: Row(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .center,
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              Expanded(
-                                                                child: Text(
-                                                                  result.listCharNew[
-                                                                      index],
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontSize:
-                                                                        17,
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                ),
-                                                              ),
-                                                              const Spacer(),
-                                                              Text(
-                                                                "${result.listOfMaps[index]['point'] == "" ? 0 : result.listOfMaps[index]['point']}",
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                )
-                                              : const SizedBox.shrink();
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            child: SingleChildScrollView(
-                              // physics: NeverScrollableScrollPhysics(),
-                              // shrinkWrap: true,
-                              controller: controller,
-                              child: Container(
-                                height: 411.0,
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(30.0),
-                                    topRight: Radius.circular(30.0),
-                                  ),
-                                ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: InkWellCir(
+                              onTap: () {
+                                showPopupSetPoint(context);
+                              },
+                              child: Center(
                                 child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 35.0,
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                numericInputButton('1'),
-                                                numericInputButton('2'),
-                                                numericInputButton('3'),
-                                              ],
-                                            ),
-                                            const SizedBox(
-                                              height: 20.0,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                numericInputButton('4'),
-                                                numericInputButton('5'),
-                                                numericInputButton('6'),
-                                              ],
-                                            ),
-                                            const SizedBox(
-                                              height: 20.0,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                numericInputButton('7'),
-                                                numericInputButton('8'),
-                                                numericInputButton('9'),
-                                              ],
-                                            ),
-                                            const SizedBox(
-                                              height: 20.0,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                numericInputButton('-/+'),
-                                                numericInputButton('0'),
-                                                backButton()
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                    SvgPicture.asset(
+                                      AppSVG.cart,
+                                      color: AppColors.primary,
                                     ),
-                                    Padding(
-                                        padding: const EdgeInsets.only(
-                                            bottom: 15.0,
-                                            left: 8.0,
-                                            right: 8.0,
-                                            top: 29.0),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 150,
-                                              child: ButtonColor(onTap: () {
-                                                Provider.of<ZiZackController>(
-                                                        context,
-                                                        listen: false)
-                                                    .setCai(context);
-                                              },
-                                                  backgroundColor:
-                                                      AppColors.primaryColor,
-                                                  "Làm Cái"),
-                                            ),
-                                            Spacer(),
-                                            Container(
-                                              width: 150,
-                                              child: ButtonColor(onTap: () {
-                                                Navigator.pop(context);
-                                              },
-                                                  backgroundColor:
-                                                      AppColors.primaryColor,
-                                                  "Set điểm"),
-                                            ),
-                                          ],
-                                        ))
+                                    Text(
+                                      'Section 1',
+                                      style: TextStyle(
+                                          color: AppColors.primaryColor),
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                  );
-                });
-              });
-            }));
-  }
-
-  Future<void> showPopupSetAdd(BuildContext context) {
-    return showModalBottomSheet<void>(
-        isScrollControlled: true,
-        isDismissible: true,
-        context: context,
-        // isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => DraggableScrollableSheet(
-            initialChildSize: 0.85,
-            minChildSize: 0.85,
-            maxChildSize: 0.85,
-            expand: false,
-            builder: (_, controller) {
-              return StatefulBuilder(builder: (BuildContext context,
-                  StateSetter setState /*You can rename this!*/) {
-                return Consumer<ZiZackController>(
-                    builder: (context, result, child) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height * 0.75,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(25.0),
-                        topRight: Radius.circular(25.0),
-                      ),
-                    ),
-                    child: SingleChildScrollView(
-                      physics: NeverScrollableScrollPhysics(),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              width: 60, // Độ rộng của hình chữ nhật
-                              height: 10, // Chiều cao của hình chữ nhật
-                              decoration: BoxDecoration(
-                                color: Colors.grey,
-                                // Màu nền của hình chữ nhật
-                                borderRadius: BorderRadius.circular(
-                                    20), // Bán kính bo tròn
+                          Container(
+                            width: 2,
+                            color: AppColors.thirdColor,
+                          ),
+                          Expanded(
+                            child: InkWellCir(
+                              onTap: () {
+                                showPopupSetAdd(context);
+                              },
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                      AppSVG.cart,
+                                      color: AppColors.primary,
+                                    ),
+                                    Text(
+                                      'Section 1',
+                                      style: TextStyle(
+                                          color: AppColors.primaryColor),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                           Container(
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 16.0, right: 16, top: 8, bottom: 8),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width:
-                                  MediaQuery.of(context).size.width < 1000 ?
-                              MediaQuery.of(context).size.width /
-                                                    2 -
-                                                20 : 300,
-                                        child: ButtonColor(
-                                          "Cái ăn tất",
-                                          backgroundColor:
-                                              AppColors.primaryColor,
-                                          onTap: () {
-                                            Provider.of<ZiZackController>(
-                                                    context,
-                                                    listen: false)
-                                                .setCheckAll(
-                                                    true,
-                                                    result.listOfMaps.length,
-                                                    true);
-                                          },
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      Container(
-                                        width:
-                                        MediaQuery.of(context).size.width < 1000 ?
-                                        MediaQuery.of(context).size.width /
-                                            2 -
-                                            20 : 300,
-                                        child: ButtonColor(
-                                          "Dân ăn tất",
-                                          backgroundColor:
-                                              AppColors.primaryColor,
-                                          onTap: () {
-                                            Provider.of<ZiZackController>(
-                                                    context,
-                                                    listen: false)
-                                                .setCheckAll(
-                                                    false,
-                                                    result.listOfMaps.length,
-                                                    true);
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 16.0, right: 16),
-                                  child: ButtonColor(
-                                    "Chốt sổ",
-                                    backgroundColor: AppColors.primaryColor,
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      Provider.of<ZiZackController>(context,
-                                              listen: false)
-                                          .calculateEndForMaps();
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
+                            width: 2,
+                            color: AppColors.thirdColor,
                           ),
-                          Container(
-                            height: 600,
-                            child: ListView(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 4.0, left: 8.0, right: 8.0),
-                                  child: Container(
-                                    height: result.listCharNew.length * 60 >
-                                            MediaQuery.of(context).size.height
-                                        ? result.listCharNew.length * 60
-                                        : MediaQuery.of(context).size.height,
-                                    child: Row(
-                                      children: [
-                                        generateColumn(
-                                            Colors.red, result.listCharNew, 0),
-                                        generateDynamicColumnsStatus(
-                                            context, Colors.blue, status),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          Expanded(
+                            child: InkWellCir(
+                              onTap: () {
+                                showPopupSetPointOwn(context);
+                              },
+                              child: Center(
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      SvgPicture.asset(
+                                        AppSVG.cart,
+                                        color: AppColors.primary,
+                                      ),
+                                      Text(
+                                        'Section 1',
+                                        style: TextStyle(
+                                            color: AppColors.primaryColor),
+                                      ),
+                                    ]),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  );
-                });
-              });
-            })).whenComplete(() =>
-        Provider.of<ZiZackController>(context, listen: false).checlNewRound());
-  }
-
-  Widget numericInputButton(String value) {
-    return Consumer<ZiZackController>(builder: (context, result, child) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          InkWell(
-            onTap: () {
-              Provider.of<ZiZackController>(context, listen: false)
-                  .appendToOutput(result.selectedIndex, value);
-            },
-            splashColor: Colors.blue,
-            child: Container(
-              height: 50,
-              width: 70,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.fiveColor,
-                    blurRadius: 3.0,
-                  )
-                ],
-              ),
-              child: Text(
-                value,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          )
-        ],
+                  ),
+                ),
+              ],
+            )),
       );
     });
   }
@@ -952,7 +763,7 @@ class _HomeZiZachState extends State<HomeZiZach> {
               child: (col != -1)
                   ? Center(
                       child: Text(
-                        "${status[col]}",
+                        "${result.status[col]}",
                         style: TextStyle(
                           fontSize: 17,
                           color: AppColors.primaryColor,

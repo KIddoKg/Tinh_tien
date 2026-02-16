@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../home_page.dart';
 import '../new_ver/screen/gameOne/game_home.dart';
 import '../new_ver/screen/gameOne/zizach_screen.dart';
+import '../new_ver/screen/gameOne/test_scroll_screen.dart';
 import '../new_ver/screen/home/history_screen.dart';
 import '../new_ver/viewModel/zizach_Controller.dart';
 
@@ -17,6 +18,7 @@ class AppRoute {
   static const zizach = '/zizach';
   static const room = '/room';
   static const homeGameZiZach = '/homeGameZiZach';
+  static const testScroll = '/testScroll';
 
   static final routes = {
     home: (context) => const HomeScreen(), // Replace with the appropriate widget
@@ -25,5 +27,6 @@ class AppRoute {
     room: (context) =>  RomMatch(),
     zizach: (context) =>  ZiZachScreen(),
     homeGameZiZach: (context) =>  HomeZiZach(),
+    testScroll: (context) =>  TestScrollScreen(),
   };
 }

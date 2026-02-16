@@ -144,7 +144,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     Spacer(),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: ButtonColor(
+                      child: KSButton(
                         "Bắt đầu",
                         backgroundColor: AppColors.primaryColor,
                         onTap: () {

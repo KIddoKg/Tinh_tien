@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:ui';
-
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppSetting {
-  String accessToken ="";
+  bool ios = false;
+  String accessToken = "";
   String refreshToken = "";
   bool? enableAuthenLocal = true;
 
@@ -39,7 +41,6 @@ class AppSetting {
   }
 
   static init() async {
-
     pref = await SharedPreferences.getInstance();
 
     var hasConfig = pref.containsKey('@appSetting');
@@ -48,21 +49,28 @@ class AppSetting {
       var objJson = jsonDecode(json!);
       AppSetting.loadConfig(objJson);
     }
-
   }
+
   void save() async {
+    if (Platform.isAndroid) {
+      // final packageInfo = await PackageInfo.fromPlatform();
+
+      ios = false;
+    } else {
+      ios = true;
+    }
     var json = _instance.toJson();
     pref.setString('@appSetting', jsonEncode(json));
 
     log('appsetting.save $json');
   }
+
   void reset() {
     pref.remove("@profile");
     print("reset");
     _instance.accessToken = '';
     _instance.refreshToken = '';
-pref.remove('@appSetting');
+    pref.remove('@appSetting');
     log('AppSetting.reset clean profileLocal');
   }
-
 }

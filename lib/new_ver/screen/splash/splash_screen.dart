@@ -10,9 +10,9 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return KSScaffold(
       backgroundColor: AppColors.primaryColor,
-      body: Column(
+      child: Column(
         children: [
           Expanded(
             child: Column(
@@ -62,7 +62,7 @@ class SplashScreen extends StatelessWidget {
 
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: ButtonColor(
+                    child: KSButton(
                       "Bắt đầu với phiên bản cũ",
                       backgroundColor: AppColors.lightNeutral10,
                       onTap: (){
@@ -74,7 +74,7 @@ class SplashScreen extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: ButtonColor(
+                    child: KSButton(
                       "Bắt đầu với phiên bản mới",
                       backgroundColor: AppColors.primaryColor,
                       onTap: (){

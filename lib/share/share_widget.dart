@@ -1,57 +1,234 @@
 import 'dart:math';
 
+import 'package:Xi_Zach/helper/appsetting.dart';
 import 'package:Xi_Zach/helper/formater.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import '../router/route.dart';
 import 'app_styles.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'dart:math' as cal;
+import 'package:bot_toast/bot_toast.dart';
+import 'package:sizer/sizer.dart';
+import 'package:provider/provider.dart';
+import '../new_ver/viewModel/zizach_Controller.dart';
 
-class ButtonColor extends StatelessWidget {
-  String title;
-  Color? backgroundColor;
-  Color? fontColor;
-  FontWeight fontWeight;
-  double fontSize;
-  double height;
-  bool isSelected;
-  void Function()? onTap;
+class KSButton extends StatelessWidget {
+  final String title;
+  final Color? backgroundColor;
+  final Color? fontColor;
+  final Color border;
+  final FontWeight fontWeight;
+  final double fontSize;
+  final double height;
+  final bool isSelected;
+  final bool lock;
+  final bool disable;
+  final String? icon;
+  final bool? isSelectBorder;
+  final void Function()? onTap;
 
-  ButtonColor(this.title,
-      {super.key,
-      this.onTap,
-      this.isSelected = false,
-      this.backgroundColor = Colors.transparent,
-      this.fontColor = Colors.blue,
-      this.fontSize = 20,
-      this.height = 60,
-      this.fontWeight = FontWeight.w500});
+  const KSButton(
+    this.title, {
+    super.key,
+    this.onTap,
+    this.isSelected = false,
+    this.isSelectBorder = false,
+    this.backgroundColor,
+    this.fontColor,
+    this.fontSize = 24,
+    this.height = 6.5,
+    this.border = Colors.transparent,
+    this.icon,
+    this.disable = false,
+    this.fontWeight = FontWeight.w500,
+    this.lock = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: height,
-        decoration: BoxDecoration(
-            color: backgroundColor == Colors.transparent ? AppColors.primaryColor : backgroundColor,
-            border: Border.all(width: 1, color: backgroundColor == Colors.transparent ? AppColors.primaryColor : backgroundColor!),
-            borderRadius: BorderRadius.circular(16)),
+    // Background Color
+    final Color resolvedBackgroundColor = lock
+        ? AppColors.whiteBg
+        : (isSelected ? AppColors.whiteBg : AppColors.primaryColor);
+
+    // Border Color
+    final Color resolvedBorderColor = lock
+        ? AppColors.primaryColorGrey
+        : (isSelected ? AppColors.primaryColor : AppColors.whiteBg);
+
+    // Font Color
+    final Color resolvedFontColor = lock
+        ? AppColors.primaryColorGrey
+        : (isSelected ? AppColors.primaryColor : AppColors.whiteBg);
+
+    return Container(
+      height: 55,
+      decoration: BoxDecoration(
+        color: backgroundColor != null
+            ? backgroundColor!
+            : resolvedBackgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: resolvedBorderColor,
+          width: 1.0,
+        ),
+      ),
+      child: InkWellCir(
+        radius: 8,
+        onTap: () {
+          if (lock) {
+            if (onTap == null && disable == false) {
+              showAlertIOS(context, "Thông báo", "Hiện tại đang phát triển");
+            } else if (disable == true) {
+              showAlertIOS(context, "Thông báo", "Chọn ngày");
+            }
+
+            return;
+          }
+
+          FocusScope.of(context).unfocus();
+          loadDataWithLoading();
+          onTap?.call();
+        },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: !isSelected ? Colors.white : AppColors.primaryColor, fontSize: fontSize, fontWeight: fontWeight),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // if (icon != null)
+                //   SvgPicture.asset(
+                //     icon!,
+                //     height: 22,
+                //     width: 22,
+                //     color: lock ? AppColors.primaryGray : AppColors.primaryColor,
+                //   ),
+                if (icon != null) const SizedBox(width: 8),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: fontWeight,
+                    color: fontColor ?? resolvedFontColor,
+                    // ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
   }
+}
+
+class ThreeDotLoading extends StatefulWidget {
+  final Color color;
+  final double size;
+
+  const ThreeDotLoading({
+    super.key,
+    this.color = Colors.blue,
+    this.size = 8,
+  });
+
+  @override
+  State<ThreeDotLoading> createState() => _ThreeDotLoadingState();
+}
+
+class _ThreeDotLoadingState extends State<ThreeDotLoading>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildDot(int index) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        // lệch pha theo thứ tự trái → phải (0, 120, 240 độ)
+        double phase = index * (2 * cal.pi / 3);
+
+        // dao động sin từ 0 → 1
+        double sine = (cal.sin(_controller.value * 2 * cal.pi - phase) + 1) / 2;
+
+        // scale dao động 0.7 → 1.2
+        double scale = 0.7 + sine * 0.5;
+
+        // opacity dao động 0.4 → 1.0
+        double opacity = 0.4 + sine * 0.6;
+
+        return Opacity(
+          opacity: opacity,
+          child: Transform.scale(
+            scale: scale,
+            child: Container(
+              width: widget.size,
+              height: widget.size,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(3, _buildDot),
+    );
+  }
+}
+
+void showCustomLoading({bool moveRoute = false}) {
+  BotToast.showCustomLoading(
+    toastBuilder: (_) => Center(
+      child: ThreeDotLoading(),
+    ),
+  );
+}
+
+Future<void> closeCustomLoading() async {
+  await Future.delayed(Duration(milliseconds: 2000));
+  BotToast.closeAllLoading();
+}
+
+Future<void> loadDataWithLoading(
+    {Future<void> Function()? action,
+    int milliseconds = 1000,
+    bool moveRoute = false}) async {
+  showCustomLoading(moveRoute: moveRoute);
+
+  await Future.delayed(Duration(milliseconds: milliseconds));
+
+  if (action != null) {
+    await action(); // Chờ action hoàn tất
+  }
+
+  await closeCustomLoading(); // Cuối cùng, đóng loading
 }
 
 class Wave extends StatelessWidget {
@@ -61,7 +238,8 @@ class Wave extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipPath(
       clipper: WaveClipperTwo(flip: true, reverse: true),
-      child: Container(height: 50, width: double.infinity, color: AppColors.secondColor),
+      child: Container(
+          height: 50, width: double.infinity, color: AppColors.secondColor),
     );
   }
 }
@@ -83,7 +261,8 @@ class TextFieldNormal extends StatelessWidget {
     return SizedBox(
       height: 80,
       child: Padding(
-        padding: const EdgeInsets.only(top: 18.0, left: 8.0, right: 8.0, bottom: 10),
+        padding:
+            const EdgeInsets.only(top: 18.0, left: 8.0, right: 8.0, bottom: 10),
         child: TextField(
           // textAlignVertical: TextAlignVertical.center,
           readOnly: lock,
@@ -141,7 +320,8 @@ class TextFiledWeb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0, bottom: 20),
+      padding:
+          const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0, bottom: 20),
       child: TextFormField(
         readOnly: lock,
         enableInteractiveSelection: false,
@@ -200,7 +380,11 @@ class Shadow extends StatelessWidget {
   Offset direction;
   double radius;
 
-  Shadow({super.key, required this.child, this.direction = Offset.zero, this.radius = 0});
+  Shadow(
+      {super.key,
+      required this.child,
+      this.direction = Offset.zero,
+      this.radius = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -227,9 +411,7 @@ class CustomStack extends StatelessWidget {
     required this.icon,
     required this.text1,
     required this.text2,
-    required this.padding_top,
-    required this.padding_left,
-    required this.padding,
+
     required this.color,
   });
 
@@ -237,51 +419,66 @@ class CustomStack extends StatelessWidget {
   final String icon;
   final String text1;
   final String text2;
-  final double padding_top;
-  final double padding_left;
-  final double padding;
+
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Padding(
-          padding: EdgeInsets.only(top: padding_top),
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            width: 250,
-            height: 380,
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-              child: Column(
+    return Container(
+      alignment: Alignment.bottomCenter,
+      width: 250,
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(20)),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              height: 340,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                image: DecorationImage(
+                  image: AssetImage(image),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
                 children: [
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
+                  Image.asset(
+                    icon,
+                    width: 40,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Flexible(
+                    // ⭐ Thay Column bằng Flexible để tránh overflow
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Image.asset(
-                          icon,
-                          width: 40,
+                        Text(
+                          text1,
+                          style: const TextStyle(
+                              color: Color(0xff2D2D2D),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20),
+                          overflow:
+                              TextOverflow.ellipsis, // ⭐ Thêm overflow handling
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              text1,
-                              style: const TextStyle(color: Color(0xff2D2D2D), fontWeight: FontWeight.bold, fontSize: 20),
-                            ),
-                            Text(
-                              text2,
-                              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 15),
-                            ),
-                          ],
+                        Text(
+                          text2,
+                          style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15),
+                          overflow:
+                              TextOverflow.ellipsis, // ⭐ Thêm overflow handling
                         ),
                       ],
                     ),
@@ -289,16 +486,9 @@ class CustomStack extends StatelessWidget {
                 ],
               ),
             ),
-          ),
+          ],
         ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(padding_left, padding, 0, 0),
-          child: Image.asset(
-            image,
-            height: 380,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -331,19 +521,22 @@ class Room extends StatelessWidget {
                   Positioned(
                     left: 40,
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage('https://john-mohamed.com/wp-content/uploads/2018/05/Profile_avatar_placeholder_large.png'),
+                      backgroundImage: NetworkImage(
+                          'https://john-mohamed.com/wp-content/uploads/2018/05/Profile_avatar_placeholder_large.png'),
                       radius: 25,
                     ),
                   ),
                   Positioned(
                     left: 20,
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage('https://as1.ftcdn.net/v2/jpg/02/88/79/62/1000_F_288796275_NAlmJ0IESWj9EpsuVcSRnOAA79wPCQPQ.jpg'),
+                      backgroundImage: NetworkImage(
+                          'https://as1.ftcdn.net/v2/jpg/02/88/79/62/1000_F_288796275_NAlmJ0IESWj9EpsuVcSRnOAA79wPCQPQ.jpg'),
                       radius: 25,
                     ),
                   ),
                   CircleAvatar(
-                    backgroundImage: NetworkImage('https://images.fineartamerica.com/images-medium-5/lost-astronaut-roberta-ferreira.jpg'),
+                    backgroundImage: NetworkImage(
+                        'https://images.fineartamerica.com/images-medium-5/lost-astronaut-roberta-ferreira.jpg'),
                     radius: 25,
                   ),
                 ],
@@ -363,7 +556,10 @@ class Room extends StatelessWidget {
                 ),
                 Text(
                   'Tạo phòng chơi ZiZach nào',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xff767070)),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff767070)),
                 ),
               ],
             )
@@ -400,7 +596,10 @@ class AppBarCus extends StatelessWidget implements PreferredSizeWidget {
 // color: Colors.white,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-              colors: [AppColors.primaryColor, AppColors.primaryColor.withOpacity(0.1)],
+              colors: [
+                AppColors.primaryColor,
+                AppColors.primaryColor.withOpacity(0.1)
+              ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               stops: [0.1, 10.0]),
@@ -422,7 +621,10 @@ class AppBarCus extends StatelessWidget implements PreferredSizeWidget {
                     const Spacer(),
                     Text(
                       title,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.lightNeutral5),
+                      style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.lightNeutral5),
                     ),
                     const Spacer(),
                     if (actions == null)
@@ -476,7 +678,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.primaryColor, AppColors.primaryColor.withOpacity(0.1)],
+              colors: [
+                AppColors.primaryColor,
+                AppColors.primaryColor.withOpacity(0.1)
+              ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               stops: [0.1, 10.0],
@@ -556,7 +761,8 @@ class HorizontalListView extends StatelessWidget {
                       height: 35,
                       decoration: BoxDecoration(
                         color: AppColors.sixColor.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(10.0), // Set your desired border radius
+                        borderRadius: BorderRadius.circular(
+                            10.0), // Set your desired border radius
                       ),
                       child: Row(
                         children: [
@@ -575,14 +781,21 @@ class HorizontalListView extends StatelessWidget {
                               child: Center(
                                   child: Text(
                                 "$index",
-                                style: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: Colors.white),
+                                style: TextStyle(
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white),
                               ))),
                           Padding(
                             padding: const EdgeInsets.only(left: 8.0),
                             child: Center(
                                 child: Text(
-                              int.parse(time).toDateString(format: 'hh:mm dd/MM/yyyy'),
-                              style: TextStyle(fontSize: 16, color: Colors.black45, fontWeight: FontWeight.w600),
+                              int.parse(time)
+                                  .toDateString(format: 'hh:mm dd/MM/yyyy'),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black45,
+                                  fontWeight: FontWeight.w600),
                             )),
                           ),
                         ],
@@ -593,13 +806,16 @@ class HorizontalListView extends StatelessWidget {
                       child: Container(
                           decoration: BoxDecoration(
                             color: AppColors.sixColor.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(10.0), // Set your desired border radius
+                            borderRadius: BorderRadius.circular(
+                                10.0), // Set your desired border radius
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
                               "Đã kết thúc",
-                              style: TextStyle(color: AppColors.primaryRedOr, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                  color: AppColors.primaryRedOr,
+                                  fontWeight: FontWeight.w500),
                             ),
                           )),
                     )
@@ -631,12 +847,15 @@ class HorizontalListView extends StatelessWidget {
                                     // Set your desired border color
                                     width: 2.0, // Set your desired border width
                                   ),
-                                  borderRadius: BorderRadius.circular(10.0), // Set your desired border radius
+                                  borderRadius: BorderRadius.circular(
+                                      10.0), // Set your desired border radius
                                 ),
                                 child: Center(
                                   child: Text(
                                     'Item ${data[dataIndex]}',
-                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16),
                                   ),
                                 ),
                               );
@@ -664,7 +883,12 @@ class InkWellCir extends StatelessWidget {
   double radius;
   bool sameColor;
 
-  InkWellCir({super.key, required this.child, this.radius = 16, this.onTap, this.sameColor = false});
+  InkWellCir(
+      {super.key,
+      required this.child,
+      this.radius = 16,
+      this.onTap,
+      this.sameColor = false});
 
   @override
   Widget build(BuildContext context) {
@@ -673,9 +897,11 @@ class InkWellCir extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
           borderRadius: BorderRadius.circular(radius),
-          splashColor: !sameColor ? AppColors.primaryColor.withOpacity(0.2) : null,
+          splashColor:
+              !sameColor ? AppColors.primaryColor.withOpacity(0.2) : null,
 // Màu sẽ xuất hiện khi nhấn và giữ
-          highlightColor: !sameColor ? AppColors.primaryColor.withOpacity(0.2) : null,
+          highlightColor:
+              !sameColor ? AppColors.primaryColor.withOpacity(0.2) : null,
           onTap: () {
             onTap?.call();
           },
@@ -689,7 +915,7 @@ class AnimatedToggle extends StatefulWidget {
   final ValueChanged onToggleCallback;
   final bool valueChoose;
   final Color backgroundColor;
-  final Color buttonColor;
+  final Color KSButton;
   final Color textColor;
   final bool lock;
   final double height;
@@ -701,7 +927,7 @@ class AnimatedToggle extends StatefulWidget {
     this.lock = false,
     required this.onToggleCallback,
     this.backgroundColor = const Color(0xFFe7e7e8),
-    required this.buttonColor,
+    required this.KSButton,
     this.textColor = const Color(0xFF000000),
     this.valueChoose = false,
     this.height = 10,
@@ -772,12 +998,13 @@ class _AnimatedToggleState extends State<AnimatedToggle> {
           AnimatedAlign(
             duration: const Duration(milliseconds: 250),
             curve: Curves.decelerate,
-            alignment: initialPosition ? Alignment.centerLeft : Alignment.centerRight,
+            alignment:
+                initialPosition ? Alignment.centerLeft : Alignment.centerRight,
             child: Container(
               width: size * 0.33,
               height: widget.height,
               decoration: ShapeDecoration(
-                color: widget.buttonColor,
+                color: widget.KSButton,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -799,8 +1026,10 @@ class _AnimatedToggleState extends State<AnimatedToggle> {
   }
 }
 
-Future<dynamic> showAlertAction(BuildContext context, String title, String message, Function()? onTap,
-    {List<CupertinoButton>? actions, List<ElevatedButton>? actionAndroids}) async {
+Future<dynamic> showAlertAction(
+    BuildContext context, String title, String message, Function()? onTap,
+    {List<CupertinoButton>? actions,
+    List<ElevatedButton>? actionAndroids}) async {
   return showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -825,7 +1054,8 @@ Future<dynamic> showAlertAction(BuildContext context, String title, String messa
 }
 
 Future<dynamic> showAlert(BuildContext context, String title, String message,
-    {List<CupertinoButton>? actions, List<ElevatedButton>? actionAndroids}) async {
+    {List<CupertinoButton>? actions,
+    List<ElevatedButton>? actionAndroids}) async {
   return showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -905,28 +1135,29 @@ Future<bool> onBackPressed(BuildContext context) async {
   return true;
 }
 
-Future<void> showAlertIOS(BuildContext context, String title, String message, {bool? autoPop, void Function()? onTap, void Function()? onTapLeft}) async {
+Future<void> showAlertIOS(BuildContext context, String title, String message,
+    {bool? autoPop, void Function()? onTap, void Function()? onTapLeft}) async {
   await showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
             title: Text(title),
             content: Text(message),
             actions: [
-              (onTapLeft != null)?
-                CupertinoButton(
-                    child: const Text('Không'),
-                    onPressed: () {
-                      if (autoPop == true) {
+              (onTapLeft != null)
+                  ? CupertinoButton(
+                      child: const Text('Không'),
+                      onPressed: () {
+                        if (autoPop == true) {
+                          Navigator.pop(context);
+                        }
+                        onTapLeft();
                         Navigator.pop(context);
-                      }
-                      onTapLeft();
-                      Navigator.pop(context);
-                    })
-             : CupertinoButton(
-                  child: Text(onTap != null ? "Không" : "Đồng ý"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
+                      })
+                  : CupertinoButton(
+                      child: Text(onTap != null ? "Không" : "Đồng ý"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      }),
               if (onTap != null)
                 CupertinoButton(
                     child: const Text('Có'),
@@ -937,7 +1168,6 @@ Future<void> showAlertIOS(BuildContext context, String title, String message, {b
                       onTap();
                       Navigator.pop(context);
                     }),
-
             ],
           ));
 
@@ -951,17 +1181,16 @@ void showExitDialog(BuildContext context) {
     context: context,
     barrierDismissible: false,
     type: QuickAlertType.warning,
-    title: 'Cảnh báo',
-    text: 'Bạn có muốn thoát khỏi trò chơi?',
+    title: 'Tạm dừng',
+    text: 'Bạn có muốn thoát và lưu trò chơi?',
     textColor: const Color.fromARGB(255, 60, 60, 60),
     confirmBtnText: 'Có',
     confirmBtnColor: const Color.fromARGB(255, 4, 114, 117),
     onConfirmBtnTap: () async {
-      // Navigator.pushReplacement(
-      //     context, MaterialPageRoute(builder: (context) => const LanguageScreen()));
-      // Navigator.of(context).popUntil(AppRoute.homeGameZiZach);
+      // Chỉ quay lại màn hình trước mà KHÔNG xóa dữ liệu
+      // Game vẫn ở trạng thái "in-progress" và có thể tiếp tục sau
       Navigator.popUntil(context, (route) {
-        // Replace the condition with your logic
+        // Quay lại màn hình ZiZach (màn hình lịch sử)
         return route.settings.name == AppRoute.zizach;
       });
     },
@@ -983,8 +1212,223 @@ void showExitDialog(BuildContext context) {
   );
 }
 
+void showEndGameDialog(BuildContext context) {
+  final controller = Provider.of<ZiZackController>(context, listen: false);
+
+  // Tính tổng điểm cho mỗi người chơi
+  List<Map<String, dynamic>> playerScores = [];
+
+  for (int i = 0; i < controller.listCharNew.length; i++) {
+    int totalScore = 0;
+    for (var round in controller.point) {
+      if (i < round.length) {
+        totalScore += round[i];
+      }
+    }
+    playerScores.add({
+      'name': controller.listCharNew[i],
+      'score': totalScore,
+    });
+  }
+
+  // Sắp xếp theo điểm từ cao xuống thấp
+  playerScores.sort((a, b) => b['score'].compareTo(a['score']));
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => AlertDialog(
+      title: Text(
+        'Kết quả trò chơi',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primaryColor,
+        ),
+      ),
+      content: Container(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              constraints: BoxConstraints(maxHeight: 400),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: playerScores.length,
+                itemBuilder: (context, index) {
+                  final player = playerScores[index];
+                  final rank = index + 1;
+                  Color rankColor = AppColors.primaryColor;
+                  IconData? rankIcon;
+
+                  if (rank == 1) {
+                    rankColor = Colors.amber;
+                    rankIcon = Icons.emoji_events;
+                  } else if (rank == 2) {
+                    rankColor = Colors.grey[400]!;
+                    rankIcon = Icons.emoji_events;
+                  } else if (rank == 3) {
+                    rankColor = Colors.brown[300]!;
+                    rankIcon = Icons.emoji_events;
+                  }
+
+                  return Container(
+                    margin: EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: rank <= 3
+                          ? rankColor.withOpacity(0.1)
+                          : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: rank <= 3 ? rankColor : Colors.grey[300]!,
+                        width: 2,
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (rankIcon != null)
+                            Icon(rankIcon, color: rankColor, size: 24)
+                          else
+                            CircleAvatar(
+                              backgroundColor: AppColors.sixColor,
+                              child: Text(
+                                '$rank',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      title: Text(
+                        player['name'],
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight:
+                              rank <= 3 ? FontWeight.bold : FontWeight.normal,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                      trailing: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color:
+                              player['score'] >= 0 ? Colors.green : Colors.red,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${player['score']}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Tổng số ván: ${controller.point.length}',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(
+            'Hủy',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryColor,
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: () async {
+            print('\n🎮 ========== KẾT THÚC GAME ==========');
+            print('🎮 Point length: ${controller.point.length}');
+            print('🎮 Players: ${controller.listCharNew.length}');
+            print(
+                '🎮 CurrentSession null? ${controller.currentSession == null}');
+
+            if (controller.currentSession != null) {
+              print('🎮 Session ID: ${controller.currentSession!.id}');
+              print(
+                  '🎮 Session status BEFORE: ${controller.currentSession!.status}');
+            }
+
+            // Đóng dialog kết quả
+            Navigator.pop(context);
+
+            // Hoàn thành session và lưu vào lịch sử TRƯỚC
+            await controller.completeCurrentSession();
+
+            print('🎮 After completeCurrentSession');
+            print(
+                '🎮 CurrentSession null? ${controller.currentSession == null}');
+
+            // SAU ĐÓ mới reset dữ liệu
+            controller.point.clear();
+            controller.listOfMaps.clear();
+            controller.calPoint.clear();
+            controller.listCharNew.clear();
+            controller.selectedIndex = -1;
+            controller.currentSession = null;
+
+            // Reset các cài đặt chế độ chơi về mặc định
+            controller.fOrc = 0; // Tự do
+            controller.dOrv = 0; // Điểm
+            controller.limitValue = 0; // Không giới hạn
+            controller.showTotalScore = false; // Không hiện tổng điểm
+
+            controller.saveListCharNew();
+
+            print('🎮 ========== DONE ==========\n');
+
+            Navigator.popUntil(context, (route) {
+              return route.settings.name == AppRoute.zizach;
+            });
+          },
+          child: Text(
+            'Kết thúc',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class LoadingDot extends StatelessWidget {
-  LoadingDot({super.key, this.text = 'Đang tải dữ liệu', this.style, this.linkLogo});
+  LoadingDot(
+      {super.key, this.text = 'Đang tải dữ liệu', this.style, this.linkLogo});
 
   String? text;
   TextStyle? style;
@@ -1027,13 +1471,18 @@ class ColorLoader2 extends StatefulWidget {
   final Color color2;
   final Color color3;
 
-  const ColorLoader2({super.key, this.color1 = Colors.deepOrangeAccent, this.color2 = Colors.yellow, this.color3 = Colors.lightGreen});
+  const ColorLoader2(
+      {super.key,
+      this.color1 = Colors.deepOrangeAccent,
+      this.color2 = Colors.yellow,
+      this.color3 = Colors.lightGreen});
 
   @override
   _ColorLoader2State createState() => _ColorLoader2State();
 }
 
-class _ColorLoader2State extends State<ColorLoader2> with TickerProviderStateMixin {
+class _ColorLoader2State extends State<ColorLoader2>
+    with TickerProviderStateMixin {
   late Animation<double> animation1;
   late Animation<double> animation2;
   late Animation<double> animation3;
@@ -1045,20 +1494,26 @@ class _ColorLoader2State extends State<ColorLoader2> with TickerProviderStateMix
   void initState() {
     super.initState();
 
-    controller1 = AnimationController(duration: const Duration(milliseconds: 1200), vsync: this);
+    controller1 = AnimationController(
+        duration: const Duration(milliseconds: 1200), vsync: this);
 
-    controller2 = AnimationController(duration: const Duration(milliseconds: 900), vsync: this);
+    controller2 = AnimationController(
+        duration: const Duration(milliseconds: 900), vsync: this);
 
-    controller3 = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
+    controller3 = AnimationController(
+        duration: const Duration(milliseconds: 2000), vsync: this);
 
-    animation1 =
-        Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: controller1, curve: const Interval(0.0, 1.0, curve: Curves.linear)));
+    animation1 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+        parent: controller1,
+        curve: const Interval(0.0, 1.0, curve: Curves.linear)));
 
-    animation2 =
-        Tween<double>(begin: -1.0, end: 0.0).animate(CurvedAnimation(parent: controller2, curve: const Interval(0.0, 1.0, curve: Curves.easeIn)));
+    animation2 = Tween<double>(begin: -1.0, end: 0.0).animate(CurvedAnimation(
+        parent: controller2,
+        curve: const Interval(0.0, 1.0, curve: Curves.easeIn)));
 
-    animation3 =
-        Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: controller3, curve: const Interval(0.0, 1.0, curve: Curves.decelerate)));
+    animation3 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+        parent: controller3,
+        curve: const Interval(0.0, 1.0, curve: Curves.decelerate)));
 
     controller1.repeat();
     controller2.repeat();
@@ -1155,8 +1610,11 @@ class Arc2Painter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    Rect rect2 =
-        Rect.fromLTWH(0.0 + (0.2 * size.width) / 2, 0.0 + (0.2 * size.height) / 2, size.width - 0.2 * size.width, size.height - 0.2 * size.height);
+    Rect rect2 = Rect.fromLTWH(
+        0.0 + (0.2 * size.width) / 2,
+        0.0 + (0.2 * size.height) / 2,
+        size.width - 0.2 * size.width,
+        size.height - 0.2 * size.height);
 
     canvas.drawArc(rect2, 0.0, 0.5 * pi, false, p2);
     canvas.drawArc(rect2, 0.8 * pi, 0.6 * pi, false, p2);
@@ -1182,8 +1640,11 @@ class Arc3Painter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    Rect rect3 =
-        Rect.fromLTWH(0.0 + (0.4 * size.width) / 2, 0.0 + (0.4 * size.height) / 2, size.width - 0.4 * size.width, size.height - 0.4 * size.height);
+    Rect rect3 = Rect.fromLTWH(
+        0.0 + (0.4 * size.width) / 2,
+        0.0 + (0.4 * size.height) / 2,
+        size.width - 0.4 * size.width,
+        size.height - 0.4 * size.height);
 
     canvas.drawArc(rect3, 0.0, 0.9 * pi, false, p3);
     canvas.drawArc(rect3, 1.1 * pi, 0.8 * pi, false, p3);
@@ -1216,7 +1677,8 @@ class ColorLoader3 extends StatefulWidget {
   _ColorLoader3State createState() => _ColorLoader3State();
 }
 
-class _ColorLoader3State extends State<ColorLoader3> with SingleTickerProviderStateMixin {
+class _ColorLoader3State extends State<ColorLoader3>
+    with SingleTickerProviderStateMixin {
   late Animation<double> animation_rotation;
   late AnimationController controller;
 
@@ -1319,6 +1781,235 @@ class Dot extends StatelessWidget {
         width: radius,
         height: radius,
         decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+    );
+  }
+}
+
+class KSWindowAreaFittedBox extends StatelessWidget {
+  final bool fitTop;
+  final bool fitBottom;
+  final bool fitLeft;
+  final bool fitRight;
+  final Color? color;
+
+  const KSWindowAreaFittedBox(
+      {this.fitTop = false,
+      this.fitBottom = false,
+      this.fitLeft = false,
+      this.fitRight = false,
+      this.color = Colors.transparent,
+      super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final padding = media.padding;
+    final size = media.size;
+    if (fitTop) {
+      return _fitBox(size.width, padding.top);
+    } else if (fitBottom) {
+      return _fitBox(size.width, padding.bottom);
+    } else if (fitLeft) {
+      return _fitBox(padding.left, null);
+    } else if (fitRight) {
+      return _fitBox(padding.right, null);
+    }
+    return Container();
+  }
+
+  Widget _fitBox(double width, double? height) => Container(
+        width: width,
+        height: height,
+        color: color!,
+      );
+}
+
+class KSScaffold extends StatelessWidget {
+  final Widget child;
+  final Color? backgroundColor;
+  final VoidCallback? onTap;
+  final Function? onBack;
+  final Widget? bottomNavigationBar;
+  final SystemUiOverlayStyle systemUiOverlayStyle;
+  final EdgeInsets padding;
+  final Color? statusBarBackgroundColor;
+  final bool safeAreaTop;
+  final bool safeAreaLeft;
+  final bool safeAreaRight;
+  final bool safeAreaBottom;
+  final PreferredSizeWidget? appbar;
+  final bool isDisableFitTop;
+  final bool isFitTopAppbar;
+  final bool isDisableFitBottom;
+  final bool isFitBottomNav;
+  final bool showLoadingPage;
+  final Widget? floatingActionButton;
+  final VoidCallback? onReady; // 👈 thêm callback khởi động sau 2s
+
+  const KSScaffold({
+    required this.child,
+    this.floatingActionButton,
+    this.backgroundColor,
+    this.onTap,
+    this.onBack,
+    this.bottomNavigationBar,
+    this.systemUiOverlayStyle = SystemUiOverlayStyle.light,
+    this.padding = EdgeInsets.zero,
+    this.statusBarBackgroundColor,
+    this.safeAreaTop = false,
+    this.safeAreaLeft = true,
+    this.safeAreaRight = true,
+    this.safeAreaBottom = false,
+    this.isDisableFitTop = false,
+    this.isDisableFitBottom = false,
+    this.isFitTopAppbar = false,
+    this.isFitBottomNav = false,
+    this.showLoadingPage = true,
+    this.appbar,
+    this.onReady, // 👈 thêm vào constructor
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // ToastHelper.init(context);
+    return AnnotatedRegion(
+      value: systemUiOverlayStyle,
+      child: WillPopScope(
+        onWillPop: () async {
+          // FocusScope.of(context).unfocus();
+          // SystemNavigator.pop(); // Thoát app
+          return true; // Không pop route vì mình đã thoát app
+        },
+        child: Scaffold(
+          appBar: appbar,
+          backgroundColor: backgroundColor ?? Colors.white,
+          body: Padding(
+            padding: EdgeInsets.only(
+              top: !isFitTopAppbar
+                  ? 0.0
+                  : AppSetting.instance.ios
+                      ? 55
+                      : 40,
+              bottom: !isFitBottomNav
+                  ? 0.0
+                  : AppSetting.instance.ios
+                      ? 8
+                      : 0,
+            ),
+            child: Column(
+              children: [
+                if (!isDisableFitTop)
+                  KSWindowAreaFittedBox(
+                    fitTop: true,
+                    color: statusBarBackgroundColor ?? AppColors.primaryColor,
+                  ),
+                // child,
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTap?.call(),
+                    child: SafeArea(
+                      top: safeAreaTop,
+                      left: safeAreaLeft,
+                      right: safeAreaRight,
+                      bottom: safeAreaBottom,
+                      child: Container(
+                        padding: padding,
+                        color: Colors.transparent,
+                        child: onReady != null
+                            ? _LoadAndStart(
+                                onReady: onReady,
+                                showLoadingPage: showLoadingPage,
+                                child: child,
+                              )
+                            : child,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          floatingActionButton: floatingActionButton,
+          bottomNavigationBar: bottomNavigationBar,
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadAndStart extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onReady;
+  final bool? showLoadingPage;
+
+  const _LoadAndStart(
+      {required this.child, this.onReady, this.showLoadingPage = false});
+
+  @override
+  State<_LoadAndStart> createState() => _LoadAndStartState();
+}
+
+class _LoadAndStartState extends State<_LoadAndStart> {
+  bool isDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showLoadingPage == true) {
+      Future.delayed(const Duration(milliseconds: 3000)).then((_) {
+        widget.onReady?.call(); // 👈 gọi hàm khởi động
+        if (mounted) {
+          setState(() => isDone = true);
+        }
+      });
+    } else {
+      if (mounted) {
+        setState(() => isDone = true);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // String iconPath = LauncherIconHelper.getCurrentIcon();
+    // Color loadingColor = LauncherIconHelper.getCurrentColor();
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child: isDone
+            ? widget.child
+            : Center(
+                key: const ValueKey("loading"),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      "assets/images/logo.png",
+                      // color: AppStyle.primaryColor,
+                      width: 75,
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: 100,
+                      height: 6,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        // 👈 Bo tròn 2 đầu
+                        child: LinearProgressIndicator(
+                          backgroundColor: Color(0xFFE0E0E0),
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
       ),
     );
   }

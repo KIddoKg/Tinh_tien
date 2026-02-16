@@ -6,7 +6,7 @@ class RomMatch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  SafeArea(
+    return SafeArea(
       child: Scaffold(
         backgroundColor: const Color(0xffF5F5F5),
         body: Column(

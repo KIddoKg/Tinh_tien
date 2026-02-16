@@ -86,6 +86,9 @@ class _HomeZiZachState extends State<HomeZiZach> {
               title: "Ván ${result.point.length}",
               leading: Row(
                 children: [
+                  SizedBox(
+                    width: 10,
+                  ),
                   CircleAvatar(
                     backgroundColor: AppColors.backgroundColor,
                     child: IconButton(

@@ -120,7 +120,7 @@ Future<BuildContext?> showPopupSetPoint(BuildContext context) {
                                             listen: false)
                                         .setCai(context);
                                   },
-                                      backgroundColor: AppColors.primaryColor,
+                                      backgroundColor: AppColors.sixColor,
                                       "Làm Cái"),
                                 ),
                                 const SizedBox(width: 16),

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../share/app_styles.dart';
 import '../../../share/share_widget.dart';
 import '../../viewModel/zizach_Controller.dart';
+import 'set_money_widget.dart';
 
 Future<void> showPopupSetPointOwn(BuildContext context) {
   // Tạo state riêng cho popup này, không dùng chung với set điểm
@@ -37,211 +38,182 @@ Future<void> showPopupSetPointOwn(BuildContext context) {
                         topRight: Radius.circular(25.0),
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          // Handle bar
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              width: 60,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+                    child: Column(
+                      children: [
+                        // Handle bar
+                        Padding(
+                          padding: const EdgeInsets.all(8.0).copyWith(top: 16),
+                          child: Container(
+                            width: 60,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: Colors.grey,
+                              borderRadius: BorderRadius.circular(20),
                             ),
                           ),
+                        ),
 
-                          // Title
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              "Nhập điểm trực tiếp",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryColor,
-                              ),
+                        // Title
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            "Nhập điểm trực tiếp",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryColor,
                             ),
                           ),
+                        ),
 
-                          // Danh sách người chơi với ô nhập điểm
-                          Expanded(
-                            child: SingleChildScrollView(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Column(
-                                children: List.generate(
-                                  (result.listCharNew.length / 3).ceil(),
-                                  (rowIndex) {
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 12.0),
-                                      child: Row(
-                                        children: [
-                                          // Player 1 (cột 1)
+                        // Danh sách người chơi với ô nhập điểm
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              children: List.generate(
+                                (result.listCharNew.length / 3).ceil(),
+                                (rowIndex) {
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 12.0),
+                                    child: Row(
+                                      children: [
+                                        // Player 1 (cột 1)
+                                        Expanded(
+                                          child: _buildPlayerCard(
+                                            context,
+                                            setState,
+                                            result,
+                                            rowIndex * 3,
+                                            tempPoints,
+                                          ),
+                                        ),
+                                        // Spacing
+                                        if (rowIndex * 3 + 1 <
+                                            result.listCharNew.length)
+                                          const SizedBox(width: 8),
+                                        // Player 2 (cột 2)
+                                        if (rowIndex * 3 + 1 <
+                                            result.listCharNew.length)
                                           Expanded(
                                             child: _buildPlayerCard(
                                               context,
                                               setState,
                                               result,
-                                              rowIndex * 3,
+                                              rowIndex * 3 + 1,
                                               tempPoints,
                                             ),
-                                          ),
-                                          // Spacing
-                                          if (rowIndex * 3 + 1 <
-                                              result.listCharNew.length)
-                                            const SizedBox(width: 8),
-                                          // Player 2 (cột 2)
-                                          if (rowIndex * 3 + 1 <
-                                              result.listCharNew.length)
-                                            Expanded(
-                                              child: _buildPlayerCard(
-                                                context,
-                                                setState,
-                                                result,
-                                                rowIndex * 3 + 1,
-                                                tempPoints,
-                                              ),
-                                            )
-                                          else
-                                            Expanded(child: Container()),
-                                          // Spacing
-                                          if (rowIndex * 3 + 2 <
-                                              result.listCharNew.length)
-                                            const SizedBox(width: 8),
-                                          // Player 3 (cột 3)
-                                          if (rowIndex * 3 + 2 <
-                                              result.listCharNew.length)
-                                            Expanded(
-                                              child: _buildPlayerCard(
-                                                context,
-                                                setState,
-                                                result,
-                                                rowIndex * 3 + 2,
-                                                tempPoints,
-                                              ),
-                                            )
-                                          else
-                                            Expanded(child: Container()),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
+                                          )
+                                        else
+                                          Expanded(child: Container()),
+                                        // Spacing
+                                        if (rowIndex * 3 + 2 <
+                                            result.listCharNew.length)
+                                          const SizedBox(width: 8),
+                                        // Player 3 (cột 3)
+                                        if (rowIndex * 3 + 2 <
+                                            result.listCharNew.length)
+                                          Expanded(
+                                            child: _buildPlayerCard(
+                                              context,
+                                              setState,
+                                              result,
+                                              rowIndex * 3 + 2,
+                                              tempPoints,
+                                            ),
+                                          )
+                                        else
+                                          Expanded(child: Container()),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
+                        ),
 
-                          // Nút điều khiển ở cuối
-                          Container(
-                            padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, -2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Hiển thị tổng điểm
-                                // Container(
-                                //   padding: const EdgeInsets.symmetric(
-                                //       horizontal: 16.0, vertical: 12.0),
-                                //   margin: const EdgeInsets.only(bottom: 12.0),
-                                //   decoration: BoxDecoration(
-                                //     color: _calculateTotalPointsWithCai(
-                                //                 result, tempPoints) ==
-                                //             0
-                                //         ? Colors.green.withOpacity(0.1)
-                                //         : Colors.red.withOpacity(0.1),
-                                //     borderRadius: BorderRadius.circular(12.0),
-                                //     border: Border.all(
-                                //       color: _calculateTotalPointsWithCai(
-                                //                   result, tempPoints) ==
-                                //               0
-                                //           ? Colors.green
-                                //           : Colors.red,
-                                //       width: 2.0,
-                                //     ),
-                                //   ),
-                                //   child: Row(
-                                //     mainAxisAlignment:
-                                //         MainAxisAlignment.spaceBetween,
-                                //     children: [
-                                //       Text(
-                                //         "Tổng điểm:",
-                                //         style: TextStyle(
-                                //           fontSize: 18,
-                                //           fontWeight: FontWeight.bold,
-                                //           color: AppColors.primaryColor,
-                                //         ),
-                                //       ),
-                                //       Text(
-                                //         "${_calculateTotalPointsWithCai(result, tempPoints)}",
-                                //         style: TextStyle(
-                                //           fontSize: 24,
-                                //           fontWeight: FontWeight.bold,
-                                //           color: _calculateTotalPointsWithCai(
-                                //                       result, tempPoints) ==
-                                //                   0
-                                //               ? Colors.green
-                                //               : Colors.red,
-                                //         ),
-                                //       ),
-                                //     ],
-                                //   ),
-                                // ),
-
-                                // Nút xác nhận (chỉ enabled khi tổng = 0)
-                                Opacity(
-                                  opacity: _calculateTotalPointsWithCai(
-                                              result, tempPoints) ==
-                                          0
-                                      ? 1.0
-                                      : 0.5,
-                                  child: KSButton(
-                                    "Xác nhận điểm",
-                                    backgroundColor: AppColors.primaryColor,
-                                    onTap: _calculateTotalPointsWithCai(
-                                                result, tempPoints) ==
-                                            0
-                                        ? () {
-                                            // Lưu tempPoints vào controller trước khi đóng
-                                            _saveDirectPoints(
-                                                context, result, tempPoints);
-                                            Navigator.pop(context);
-                                          }
-                                        : () {
-                                            // Hiển thị thông báo lỗi
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  "Tổng điểm phải bằng 0! Hiện tại: ${_calculateTotalPointsWithCai(result, tempPoints)}",
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                ),
-                                                backgroundColor: Colors.red,
-                                                duration: Duration(seconds: 2),
-                                              ),
-                                            );
-                                          },
-                                  ),
-                                ),
-                              ],
-                            ),
+                        // Nút điều khiển ở cuối
+                        Container(
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, -2),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // 2 nút nằm chung 1 hàng
+                              Row(
+                                children: [
+                                  // Nút Cài Cái
+                                  Expanded(
+                                    child: KSButton(
+                                      "Cài Cái",
+                                      backgroundColor: AppColors.sixColor,
+                                      onTap: () async {
+                                        // Đóng popup hiện tại
+                                        Navigator.pop(context);
+                                        // Mở popup Cài điểm
+                                        await showPopupSetPoint(context);
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+
+                                  // Nút xác nhận (chỉ enabled khi tổng = 0)
+                                  Expanded(
+                                    child: Opacity(
+                                      opacity: _calculateTotalPointsWithCai(
+                                                  result, tempPoints) ==
+                                              0
+                                          ? 1.0
+                                          : 0.5,
+                                      child: KSButton(
+                                        "Xác nhận",
+                                        backgroundColor: AppColors.primaryColor,
+                                        onTap: _calculateTotalPointsWithCai(
+                                                    result, tempPoints) ==
+                                                0
+                                            ? () {
+                                                // Lưu tempPoints vào controller trước khi đóng
+                                                _saveDirectPoints(context,
+                                                    result, tempPoints);
+                                                Navigator.pop(context);
+                                              }
+                                            : () {
+                                                // Hiển thị thông báo lỗi
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      "Tổng điểm phải bằng 0! Hiện tại: ${_calculateTotalPointsWithCai(result, tempPoints)}",
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                    backgroundColor: Colors.red,
+                                                    duration:
+                                                        Duration(seconds: 2),
+                                                  ),
+                                                );
+                                              },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );

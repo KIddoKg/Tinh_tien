@@ -702,32 +702,32 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                if (leading != null) leading!,
-                const Spacer(),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+      title: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              if (leading != null) leading!,
+              Expanded(
+                child: Center(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                if (actions == null) SizedBox(width: 40),
-                if (actions != null) actions!,
-              ],
-            ),
-            if (bottom != null) bottom!,
-          ],
-        ),
+              ),
+              if (actions != null) actions!,
+            ],
+          ),
+          if (bottom != null) bottom!,
+        ],
       ),
+      titleSpacing: 0,
+      leadingWidth: 0,
       toolbarHeight: MediaQuery.of(context).size.height * 0.07 + 20,
     );
   }

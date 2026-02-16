@@ -90,7 +90,7 @@ Future<void> showPopupSetAdd(BuildContext context) {
                                   Expanded(
                                     child: KSButton(
                                       "Cái ăn tất",
-                                      backgroundColor: AppColors.primaryColor,
+                                      backgroundColor: AppColors.sixColor,
                                       onTap: () {
                                         Provider.of<ZiZackController>(context,
                                                 listen: false)
@@ -103,7 +103,7 @@ Future<void> showPopupSetAdd(BuildContext context) {
                                   Expanded(
                                     child: KSButton(
                                       "Dân ăn tất",
-                                      backgroundColor: AppColors.primaryColor,
+                                      backgroundColor: AppColors.sixColor,
                                       onTap: () {
                                         Provider.of<ZiZackController>(context,
                                                 listen: false)

@@ -208,17 +208,24 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
       appBar: CustomAppBar(
         context: context,
         title: "Zi Zách",
-        leading: CircleAvatar(
-          backgroundColor: AppColors.backgroundColor,
-          child: IconButton(
-            icon: SvgPicture.asset(
-              AppSVG.back,
-              color: AppColors.primary,
+        leading: Row(
+          children: [
+            const SizedBox(
+              width: 10,
             ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+            CircleAvatar(
+              backgroundColor: AppColors.backgroundColor,
+              child: IconButton(
+                icon: SvgPicture.asset(
+                  AppSVG.back,
+                  color: AppColors.primary,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
         ),
         // actions: Row(
         //   children: [

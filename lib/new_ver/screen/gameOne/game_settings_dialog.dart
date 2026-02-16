@@ -740,25 +740,25 @@ Future<BuildContext?> showGameSettingsDialog(BuildContext context) {
                                                 SizedBox(
                                                   width: 20,
                                                 ),
-                                                tempDOrv == 0
-                                                    ? Text(
-                                                        "điểm",
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 18,
-                                                            color: AppColors
-                                                                .primaryColor),
-                                                      )
-                                                    : Text(
-                                                        "ván",
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 18,
-                                                            color: AppColors
-                                                                .primaryColor),
-                                                      )
+                                                // tempDOrv == 0
+                                                //     ? Text(
+                                                //         "điểm",
+                                                //         style: TextStyle(
+                                                //             fontWeight:
+                                                //                 FontWeight.w600,
+                                                //             fontSize: 18,
+                                                //             color: AppColors
+                                                //                 .primaryColor),
+                                                //       )
+                                                //     : Text(
+                                                //         "ván",
+                                                //         style: TextStyle(
+                                                //             fontWeight:
+                                                //                 FontWeight.w600,
+                                                //             fontSize: 18,
+                                                //             color: AppColors
+                                                //                 .primaryColor),
+                                                //       )
                                               ],
                                             ),
                                             // Center(

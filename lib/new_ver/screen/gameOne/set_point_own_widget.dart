@@ -157,13 +157,16 @@ Future<void> showPopupSetPointOwn(BuildContext context) {
                                   // Nút Cài Cái
                                   Expanded(
                                     child: KSButton(
-                                      "Cài Cái",
+                                      "Làm Cái",
                                       backgroundColor: AppColors.sixColor,
                                       onTap: () async {
                                         // Đóng popup hiện tại
-                                        Navigator.pop(context);
+                                        // Navigator.pop(context);
                                         // Mở popup Cài điểm
-                                        await showPopupSetPoint(context);
+                                        // await showPopupSetPoint(context);
+                                        Provider.of<ZiZackController>(context,
+                                            listen: false)
+                                            .setCai(context);
                                       },
                                     ),
                                   ),

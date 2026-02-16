@@ -951,14 +951,6 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                                   controller: controller,
                                   child: Column(
                                     children: [
-                                      Text(
-                                        "Người chơi",
-                                        style: TextStyle(
-                                            fontSize: 26,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColors.primaryColor),
-                                      ),
-
                                       // Hiển thị số lượng người chơi
                                       if (result.listCharNew.isNotEmpty)
                                         Padding(
@@ -993,102 +985,110 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                                       SizedBox(
                                         height: 10,
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Wrap(
-                                            alignment: WrapAlignment.start,
-                                            crossAxisAlignment:
-                                                WrapCrossAlignment.start,
-                                            spacing:
-                                                8.0, // Khoảng cách giữa các item theo chiều ngang
-                                            runSpacing:
-                                                8.0, // Khoảng cách giữa các hàng
-                                            children: result.listCharNew
-                                                .map((playerName) {
-                                              final index = result.listCharNew
-                                                  .indexOf(playerName);
+                                      // Wrap trong IgnorePointer để tránh xung đột scroll
+                                      IgnorePointer(
+                                        ignoring: false,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Wrap(
+                                              alignment: WrapAlignment.start,
+                                              crossAxisAlignment:
+                                                  WrapCrossAlignment.start,
+                                              spacing:
+                                                  8.0, // Khoảng cách giữa các item theo chiều ngang
+                                              runSpacing:
+                                                  8.0, // Khoảng cách giữa các hàng
+                                              children: result.listCharNew
+                                                  .map((playerName) {
+                                                final index = result.listCharNew
+                                                    .indexOf(playerName);
 
-                                              // Tính toán chiều rộng phù hợp dựa trên độ dài tên
-                                              double textWidth =
-                                                  _calculateTextWidth(
-                                                          playerName, 17) +
-                                                      60; // +60 cho padding và icon
-                                              double containerWidth =
-                                                  textWidth.clamp(
-                                                      100.0,
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .width *
-                                                          0.45);
+                                                // Tính toán chiều rộng phù hợp dựa trên độ dài tên
+                                                double textWidth =
+                                                    _calculateTextWidth(
+                                                            playerName, 17) +
+                                                        60; // +60 cho padding và icon
+                                                double containerWidth =
+                                                    textWidth.clamp(
+                                                        100.0,
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.45);
 
-                                              return Container(
-                                                width: containerWidth,
-                                                height: 60,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 12.0,
-                                                        vertical: 8.0),
-                                                decoration: BoxDecoration(
-                                                  color: AppColors.sixColor
-                                                      .withOpacity(0.5),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        playerName,
-                                                        style: const TextStyle(
-                                                          fontSize: 17,
-                                                          color: Colors.blue,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          result.listCharNew
-                                                              .removeAt(index);
-                                                        });
-                                                      },
-                                                      child: Container(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(4),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: AppColors
-                                                              .primaryRedOr
-                                                              .withOpacity(0.1),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(12),
-                                                        ),
-                                                        child: Icon(
-                                                          Icons.close,
-                                                          color: AppColors
-                                                              .primaryRedOr,
-                                                          size: 16,
+                                                return Container(
+                                                  width: containerWidth,
+                                                  height: 60,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 12.0,
+                                                      vertical: 8.0),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.sixColor
+                                                        .withOpacity(0.5),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
+                                                          playerName,
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 17,
+                                                            color: Colors.blue,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          textAlign:
+                                                              TextAlign.left,
                                                         ),
                                                       ),
-                                                    )
-                                                  ],
-                                                ),
-                                              );
-                                            }).toList(),
+                                                      const SizedBox(width: 8),
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          setState(() {
+                                                            result.listCharNew
+                                                                .removeAt(
+                                                                    index);
+                                                          });
+                                                        },
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(4),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: AppColors
+                                                                .primaryRedOr
+                                                                .withOpacity(
+                                                                    0.1),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12),
+                                                          ),
+                                                          child: Icon(
+                                                            Icons.close,
+                                                            color: AppColors
+                                                                .primaryRedOr,
+                                                            size: 16,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -1382,29 +1382,29 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                                                             SizedBox(
                                                               width: 20,
                                                             ),
-                                                            result.dOrv == 0
-                                                                ? Text(
-                                                                    "điểm",
-                                                                    style: TextStyle(
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600,
-                                                                        fontSize:
-                                                                            18,
-                                                                        color: AppColors
-                                                                            .primaryColor),
-                                                                  )
-                                                                : Text(
-                                                                    "ván",
-                                                                    style: TextStyle(
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600,
-                                                                        fontSize:
-                                                                            18,
-                                                                        color: AppColors
-                                                                            .primaryColor),
-                                                                  )
+                                                            // result.dOrv == 0
+                                                            //     ? Text(
+                                                            //         "điểm",
+                                                            //         style: TextStyle(
+                                                            //             fontWeight:
+                                                            //                 FontWeight
+                                                            //                     .w600,
+                                                            //             fontSize:
+                                                            //                 18,
+                                                            //             color: AppColors
+                                                            //                 .primaryColor),
+                                                            //       )
+                                                            //     : Text(
+                                                            //         "ván",
+                                                            //         style: TextStyle(
+                                                            //             fontWeight:
+                                                            //                 FontWeight
+                                                            //                     .w600,
+                                                            //             fontSize:
+                                                            //                 18,
+                                                            //             color: AppColors
+                                                            //                 .primaryColor),
+                                                            //       )
                                                           ],
                                                         ),
                                                         result.dOrv == 0

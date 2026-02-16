@@ -1240,7 +1240,7 @@ Future<void> showCustomAlert(
 
   switch (type) {
     case AlertType.success:
-      primaryColor = Colors.green;
+      primaryColor = AppColors.sixColor;
       iconData = Icons.check_circle_outline;
       iconBackgroundColor = Colors.green.shade50;
       break;

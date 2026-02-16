@@ -55,15 +55,210 @@ Future<void> showPopupSetAdd(BuildContext context) {
                           child: Padding(
                             padding: const EdgeInsets.only(
                                 top: 4.0, left: 8.0, right: 8.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                // Cột tên (cố định)
-                                generateColumn(
-                                    Colors.red, result.listCharNew, 0),
-                                // Các cột checkbox (scroll ngang)
-                                generateDynamicColumnsStatus(
-                                    context, Colors.blue, result.status),
+                                // Header row cố định
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Header cột tên
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 4.0, left: 4.0, right: 4.0),
+                                      child: Container(
+                                        height: 50,
+                                        width: 70,
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          "Tên:",
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                            color: AppColors.primaryColor,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                    // Header các cột checkbox
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 4.0, left: 4.0, right: 4.0),
+                                        child: Row(
+                                          children: List.generate(
+                                            result.status.length,
+                                            (colIndex) => Expanded(
+                                              child: Container(
+                                                height: 50,
+                                                alignment: Alignment.center,
+                                                margin: const EdgeInsets.symmetric(
+                                                    horizontal: 2.0),
+                                                child: Text(
+                                                  result.status[colIndex],
+                                                  style: TextStyle(
+                                                    fontSize: 17,
+                                                    color: AppColors.primaryColor,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // Phần scroll chung cho cả tên và checkbox
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      children: result.listCharNew
+                                          .asMap()
+                                          .entries
+                                          .map((entry) {
+                                        final int playerIndex = entry.key;
+                                        final String playerName = entry.value;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 4.0, left: 4.0, right: 4.0),
+                                          child: Row(
+                                            children: [
+                                              // Tên người chơi
+                                              Container(
+                                                height: 50,
+                                                width: 70,
+                                                decoration: BoxDecoration(
+                                                  color: result.listOfMaps[
+                                                              playerIndex]
+                                                          ['cai'] ==
+                                                      false
+                                                      ? AppColors.sixColor
+                                                      : AppColors.primaryColor,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                    width: 2.0,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(10.0),
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  playerName,
+                                                  style: TextStyle(
+                                                    fontSize: 17,
+                                                    color: AppColors.whiteBg,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              // Các checkbox
+                                              Expanded(
+                                                child: Row(
+                                                  children: List.generate(
+                                                    result.status.length,
+                                                    (colIndex) {
+                                                      String printValue =
+                                                          (colIndex == 0)
+                                                              ? 'win'
+                                                              : (colIndex == 1)
+                                                                  ? 'def'
+                                                                  : (colIndex == 2)
+                                                                      ? 'x2'
+                                                                      : (colIndex ==
+                                                                              3)
+                                                                          ? 'all'
+                                                                          : '';
+                                                      return Expanded(
+                                                        child: Container(
+                                                          height: 50,
+                                                          margin: const EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 2.0),
+                                                          decoration: BoxDecoration(
+                                                            color: AppColors
+                                                                .sixColor,
+                                                            border: Border.all(
+                                                              color: Colors.white,
+                                                              width: 2.0,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(10.0),
+                                                          ),
+                                                          alignment:
+                                                              Alignment.center,
+                                                          child: Checkbox(
+                                                            value: result
+                                                                        .calPoint[
+                                                                    playerIndex]
+                                                                [printValue] ??
+                                                                false,
+                                                            activeColor: AppColors
+                                                                .primaryColor,
+                                                            checkColor:
+                                                                Colors.white,
+                                                            onChanged:
+                                                                (bool? value) {
+                                                              if (result.listOfMaps[
+                                                                          playerIndex]
+                                                                      ['cai'] ==
+                                                                  false) {
+                                                                // Nếu đang tích (value == true), bỏ tích tất cả checkbox khác của người này
+                                                                if (value ==
+                                                                    true) {
+                                                                  // Bỏ tích các checkbox khác
+                                                                  [
+                                                                    'win',
+                                                                    'def',
+                                                                    'x2',
+                                                                    'all'
+                                                                  ].forEach((key) {
+                                                                    if (key !=
+                                                                        printValue) {
+                                                                      Provider.of<ZiZackController>(
+                                                                              context,
+                                                                              listen:
+                                                                                  false)
+                                                                          .setCheckBox(
+                                                                              playerIndex +
+                                                                                  1,
+                                                                              key,
+                                                                              false);
+                                                                    }
+                                                                  });
+                                                                }
+                                                                // Sau đó mới set checkbox hiện tại
+                                                                Provider.of<
+                                                                            ZiZackController>(
+                                                                        context,
+                                                                        listen:
+                                                                            false)
+                                                                    .setCheckBox(
+                                                                        playerIndex +
+                                                                            1,
+                                                                        printValue,
+                                                                        value!);
+                                                              }
+                                                            },
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

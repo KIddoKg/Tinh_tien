@@ -117,7 +117,9 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 64,),
+                  SizedBox(
+                    height: 64,
+                  ),
                   CarouselSlider(
                       options: CarouselOptions(
                         autoPlay: true,
@@ -137,36 +139,40 @@ class HomeScreen extends StatelessWidget {
                             icon: 'assets/images/cloud 1.png',
                             text1: 'ZiZach',
                             text2: 'Nhiều người',
-
                             color: Color(0xff2D2D2D),
                           ),
                         ),
                         InkWell(
                           onTap: () {
-                            showAlert(context, 'Thông báo',
-                                'Phần này đang làm nha, đang lười qué');
+                            showCustomAlert(
+                              context,
+                              type: AlertType.warning,
+                              title: 'Thông báo',
+                              message: 'Phần này đang làm nha, đang lười qué',
+                            );
                           },
                           child: const CustomStack(
                             image: 'assets/images/logo_2.png',
                             icon: 'assets/images/NetBar.png',
                             text1: 'Tien len',
                             text2: '2-4 người',
-
-
                             color: Color(0xff444444),
                           ),
                         ),
                         InkWell(
                           onTap: () {
-                            showAlert(context, 'Thông báo',
-                                'Phần này đang làm nha, đang lười qué');
+                            showCustomAlert(
+                              context,
+                              type: AlertType.warning,
+                              title: 'Thông báo',
+                              message: 'Phần này đang làm nha, đang lười qué',
+                            );
                           },
                           child: const CustomStack(
                             image: 'assets/images/logo_3.png',
                             icon: 'assets/images/group 1.png',
                             text1: 'Chơi nhiều người',
                             text2: 'Game không cần cái',
-
                             color: Color(0xff444444),
                           ),
                         ),

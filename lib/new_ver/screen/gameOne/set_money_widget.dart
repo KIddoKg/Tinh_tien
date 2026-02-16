@@ -129,7 +129,7 @@ Future<BuildContext?> showPopupSetPoint(BuildContext context) {
                                     Navigator.pop(context);
                                   },
                                       backgroundColor: AppColors.primaryColor,
-                                      "Set điểm"),
+                                      "Xong"),
                                 ),
                               ],
                             ),
@@ -591,16 +591,32 @@ Widget _buildPlayerCardSetMoney(BuildContext context,
         mainAxisSize: MainAxisSize.min,
         children: [
           // Tên người chơi
-          Text(
-            name,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryColor,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              if (isCai)
+                Text(
+                  " (Cái)",
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryColor.withOpacity(0.7),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 6),
 

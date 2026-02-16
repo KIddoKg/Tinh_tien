@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import '../router/route.dart';
 import 'app_styles.dart';
-import 'package:quickalert/quickalert.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:math' as cal;
 import 'package:bot_toast/bot_toast.dart';
@@ -82,9 +81,19 @@ class KSButton extends StatelessWidget {
         onTap: () {
           if (lock) {
             if (onTap == null && disable == false) {
-              showAlertIOS(context, "Thông báo", "Hiện tại đang phát triển");
+              showCustomAlert(
+                context,
+                type: AlertType.warning,
+                title: 'Thông báo',
+                message: 'Hiện tại đang phát triển',
+              );
             } else if (disable == true) {
-              showAlertIOS(context, "Thông báo", "Chọn ngày");
+              showCustomAlert(
+                context,
+                type: AlertType.warning,
+                title: 'Thông báo',
+                message: 'Chọn ngày',
+              );
             }
 
             return;
@@ -411,7 +420,6 @@ class CustomStack extends StatelessWidget {
     required this.icon,
     required this.text1,
     required this.text2,
-
     required this.color,
   });
 
@@ -501,7 +509,12 @@ class Room extends StatelessWidget {
     return InkWell(
       onTap: () {
         // Navigator.of(context).pushNamed(AppRoute.welcome);
-        showAlert(context, 'Thông báo', 'Phần này đang làm nha, đang lười qué');
+        showCustomAlert(
+          context,
+          type: AlertType.warning,
+          title: 'Thông báo',
+          message: 'Phần này đang làm nha, đang lười qué',
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -1176,38 +1189,287 @@ Future<void> showAlertIOS(BuildContext context, String title, String message,
   // }
 }
 
-void showExitDialog(BuildContext context) {
-  QuickAlert.show(
+// Enum cho các loại thông báo
+enum AlertType {
+  success,
+  error,
+  warning,
+}
+
+/// Widget thông báo tùy chỉnh
+///
+/// Sử dụng:
+/// ```dart
+/// // Thông báo thành công với 1 nút
+/// showCustomAlert(
+///   context,
+///   type: AlertType.success,
+///   title: 'Thành công',
+///   message: 'Dữ liệu đã được lưu!',
+///   confirmText: 'OK',
+///   onConfirm: () => print('Confirmed'),
+/// );
+///
+/// // Thông báo lỗi với 2 nút
+/// showCustomAlert(
+///   context,
+///   type: AlertType.error,
+///   title: 'Lỗi',
+///   message: 'Không thể xóa dữ liệu!',
+///   showTwoButtons: true,
+///   cancelText: 'Hủy',
+///   confirmText: 'Thử lại',
+///   onConfirm: () => print('Retry'),
+/// );
+/// ```
+Future<void> showCustomAlert(
+  BuildContext context, {
+  required AlertType type,
+  required String title,
+  required String message,
+  bool showTwoButtons = false,
+  String? cancelText,
+  String confirmText = 'OK',
+  VoidCallback? onConfirm,
+  VoidCallback? onCancel,
+}) async {
+  // Cấu hình màu sắc và icon theo loại thông báo
+  Color primaryColor;
+  IconData iconData;
+  Color iconBackgroundColor;
+
+  switch (type) {
+    case AlertType.success:
+      primaryColor = Colors.green;
+      iconData = Icons.check_circle_outline;
+      iconBackgroundColor = Colors.green.shade50;
+      break;
+    case AlertType.error:
+      primaryColor = Colors.red;
+      iconData = Icons.error_outline;
+      iconBackgroundColor = Colors.red.shade50;
+      break;
+    case AlertType.warning:
+      primaryColor = Colors.orange;
+      iconData = Icons.warning_amber_outlined;
+      iconBackgroundColor = Colors.orange.shade50;
+      break;
+  }
+
+  await showDialog(
     context: context,
     barrierDismissible: false,
-    type: QuickAlertType.warning,
-    title: 'Tạm dừng',
-    text: 'Bạn có muốn thoát và lưu trò chơi?',
-    textColor: const Color.fromARGB(255, 60, 60, 60),
-    confirmBtnText: 'Có',
-    confirmBtnColor: const Color.fromARGB(255, 4, 114, 117),
-    onConfirmBtnTap: () async {
-      // Chỉ quay lại màn hình trước mà KHÔNG xóa dữ liệu
-      // Game vẫn ở trạng thái "in-progress" và có thể tiếp tục sau
-      Navigator.popUntil(context, (route) {
-        // Quay lại màn hình ZiZach (màn hình lịch sử)
-        return route.settings.name == AppRoute.zizach;
-      });
-    },
-    confirmBtnTextStyle: const TextStyle(
-      color: Colors.white,
-      fontSize: 18,
-      fontWeight: FontWeight.normal,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      contentPadding: EdgeInsets.zero,
+      content: Container(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icon
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: iconBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                iconData,
+                color: primaryColor,
+                size: 48,
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // Title
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 12),
+
+            // Message
+            Text(
+              message,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 24),
+
+            // Buttons
+            if (showTwoButtons)
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onCancel?.call();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side:
+                              BorderSide(color: Colors.grey.shade300, width: 1),
+                        ),
+                      ),
+                      child: Text(
+                        cancelText ?? 'Không',
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onConfirm?.call();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        confirmText,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onConfirm?.call();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    confirmText,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     ),
-    showCancelBtn: true,
-    cancelBtnText: 'Không',
-    onCancelBtnTap: () {
-      Navigator.pop(context);
-    },
-    cancelBtnTextStyle: const TextStyle(
-      color: Colors.grey,
-      fontSize: 18,
-      fontWeight: FontWeight.normal,
+  );
+}
+
+void showExitDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: Row(
+        children: [
+          Icon(
+            Icons.pause_circle_outline,
+            color: AppColors.primaryColor,
+            size: 32,
+          ),
+          SizedBox(width: 12),
+          Text(
+            'Tạm dừng',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            ),
+          ),
+        ],
+      ),
+      content: Text(
+        'Bạn có muốn thoát và lưu trò chơi?',
+        style: TextStyle(
+          fontSize: 16,
+          color: Color.fromARGB(255, 60, 60, 60),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(
+            'Không',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 18,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color.fromARGB(255, 4, 114, 117),
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: () async {
+            // Chỉ quay lại màn hình trước mà KHÔNG xóa dữ liệu
+            // Game vẫn ở trạng thái "in-progress" và có thể tiếp tục sau
+            Navigator.popUntil(context, (route) {
+              // Quay lại màn hình ZiZach (màn hình lịch sử)
+              return route.settings.name == AppRoute.zizach;
+            });
+          },
+          child: Text(
+            'Có',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }

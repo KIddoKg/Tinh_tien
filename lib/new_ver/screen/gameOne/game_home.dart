@@ -2,6 +2,7 @@ import 'package:Xi_Zach/new_ver/screen/gameOne/set_money_widget.dart';
 import 'package:Xi_Zach/new_ver/screen/gameOne/set_point_own_widget.dart';
 import 'package:Xi_Zach/new_ver/screen/gameOne/set_point_wave_widget.dart';
 import 'package:Xi_Zach/new_ver/screen/gameOne/game_settings_dialog.dart';
+import 'package:Xi_Zach/new_ver/screen/gameOne/game_guide_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -113,31 +114,36 @@ class _HomeZiZachState extends State<HomeZiZach> {
                       },
                     ),
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  CircleAvatar(
-                    backgroundColor: AppColors.backgroundColor,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.bug_report,
-                        color: AppColors.primary,
-                      ),
-                      onPressed: () async {
-                        // In ra console để debug
-                        print('\n🔍 DEBUG: Checking game history...\n');
-                        await Provider.of<ZiZackController>(context,
-                                listen: false)
-                            .printGameHistory();
-                        Provider.of<ZiZackController>(context, listen: false)
-                            .printCurrentSession();
-
-                        // Hiển thị thông báo
-                        showAlert(context, 'Debug',
-                            'Đã in gameHistory ra console. Kiểm tra debug console để xem!');
-                      },
-                    ),
-                  ),
+                  // const SizedBox(
+                  //   width: 10,
+                  // ),
+                  // CircleAvatar(
+                  //   backgroundColor: AppColors.backgroundColor,
+                  //   child: IconButton(
+                  //     icon: Icon(
+                  //       Icons.bug_report,
+                  //       color: AppColors.primary,
+                  //     ),
+                  //     onPressed: () async {
+                  //       // In ra console để debug
+                  //       print('\n🔍 DEBUG: Checking game history...\n');
+                  //       await Provider.of<ZiZackController>(context,
+                  //               listen: false)
+                  //           .printGameHistory();
+                  //       Provider.of<ZiZackController>(context, listen: false)
+                  //           .printCurrentSession();
+                  //
+                  //       // Hiển thị thông báo
+                  //       showCustomAlert(
+                  //         context,
+                  //         type: AlertType.success,
+                  //         title: 'Debug',
+                  //         message:
+                  //             'Đã in gameHistory ra console. Kiểm tra debug console để xem!',
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
               actions: Row(
@@ -146,13 +152,51 @@ class _HomeZiZachState extends State<HomeZiZach> {
                     backgroundColor: AppColors.backgroundColor,
                     child: IconButton(
                       icon: Icon(
+                        Icons.help_outline,
+                        color: AppColors.primary,
+                      ),
+                      tooltip: 'Hướng dẫn chơi game',
+                      onPressed: () {
+                        showGameGuideDialog(context);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  CircleAvatar(
+                    backgroundColor: AppColors.backgroundColor,
+                    child: IconButton(
+                      icon: Icon(
+                        result.inputMode == 0
+                            ? Icons.calculate_outlined
+                            : Icons.back_hand_outlined,
+                        color: AppColors.primary,
+                      ),
+                      tooltip: result.inputMode == 0
+                          ? 'Chuyển sang chế độ Tính tay'
+                          : 'Chuyển sang chế độ Tính điểm',
+                      onPressed: () {
+                        Provider.of<ZiZackController>(context, listen: false)
+                            .toggleInputMode();
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  CircleAvatar(
+                    backgroundColor: AppColors.backgroundColor,
+                    child: IconButton(
+                      icon: Icon(
                         Icons.emoji_events,
                         color: AppColors.primary,
                       ),
+                      tooltip: 'Kết thúc game',
                       onPressed: () {
                         if (result.point.isEmpty) {
-                          showAlert(context, 'Thông báo',
-                              'Chưa có ván nào để kết thúc!');
+                          showCustomAlert(
+                            context,
+                            type: AlertType.warning,
+                            title: 'Thông báo',
+                            message: 'Chưa có ván nào để kết thúc!',
+                          );
                         } else {
                           showEndGameDialog(context);
                         }
@@ -454,92 +498,92 @@ class _HomeZiZachState extends State<HomeZiZach> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: InkWellCir(
-                              onTap: () {
-                                showPopupSetPoint(context);
-                              },
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      AppSVG.cart,
-                                      color: AppColors.primary,
-                                    ),
-                                    Text(
-                                      'Section 1',
-                                      style: TextStyle(
-                                          color: AppColors.primaryColor),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 2,
-                            color: AppColors.thirdColor,
-                          ),
-                          Expanded(
-                            child: InkWellCir(
-                              onTap: () {
-                                showPopupSetAdd(context);
-                              },
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      AppSVG.cart,
-                                      color: AppColors.primary,
-                                    ),
-                                    Text(
-                                      'Section 1',
-                                      style: TextStyle(
-                                          color: AppColors.primaryColor),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 2,
-                            color: AppColors.thirdColor,
-                          ),
-                          Expanded(
-                            child: InkWellCir(
-                              onTap: () {
-                                showPopupSetPointOwn(context);
-                              },
-                              child: Center(
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        AppSVG.cart,
-                                        color: AppColors.primary,
+                      child: result.inputMode == 0
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: InkWellCir(
+                                    onTap: () {
+                                      showPopupSetPoint(context);
+                                    },
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.padding_outlined),
+                                          Text(
+                                            'Cài điểm',
+                                            style: TextStyle(
+                                                color: AppColors.primaryColor),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        'Section 1',
-                                        style: TextStyle(
-                                            color: AppColors.primaryColor),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: 2,
+                                  color: AppColors.thirdColor,
+                                ),
+                                Expanded(
+                                  child: InkWellCir(
+                                    onTap: () {
+                                      showPopupSetAdd(context);
+                                    },
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.calculate_outlined),
+                                          Text(
+                                            'Tính điểm',
+                                            style: TextStyle(
+                                                color: AppColors.primaryColor),
+                                          ),
+                                        ],
                                       ),
-                                    ]),
-                              ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: InkWellCir(
+                                    onTap: () {
+                                      showPopupSetPointOwn(context);
+                                    },
+                                    child: Center(
+                                      child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.back_hand_outlined),
+                                            Text(
+                                              'Tính tay',
+                                              style: TextStyle(
+                                                  color:
+                                                      AppColors.primaryColor),
+                                            ),
+                                          ]),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ),

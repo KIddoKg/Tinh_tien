@@ -21,12 +21,13 @@ class AppRoute {
   static const testScroll = '/testScroll';
 
   static final routes = {
-    home: (context) => const HomeScreen(), // Replace with the appropriate widget
+    home: (context) =>
+        const HomeScreen(), // Replace with the appropriate widget
     splash: (context) => const SplashScreen(),
-    welcome: (context) =>  WelcomeScreen(),
-    room: (context) =>  RomMatch(),
-    zizach: (context) =>  ZiZachScreen(),
-    homeGameZiZach: (context) =>  HomeZiZach(),
-    testScroll: (context) =>  TestScrollScreen(),
+    welcome: (context) => WelcomeScreen(),
+    room: (context) => RomMatch(),
+    zizach: (context) => ZiZachScreen(),
+    homeGameZiZach: (context) => HomeZiZach(),
+    testScroll: (context) => TestScrollScreen(),
   };
 }

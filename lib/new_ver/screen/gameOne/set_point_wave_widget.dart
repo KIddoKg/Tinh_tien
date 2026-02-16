@@ -389,10 +389,25 @@ Widget generateColumnStatus(
                   children: [
                     Checkbox(
                       value: result.calPoint[index - 1][printValue] ?? false,
+                      activeColor: AppColors.primaryColor,
+                      checkColor: Colors.white,
                       onChanged: (bool? value) {
-                        if (result.listOfMaps[index - 1]['cai'] == false)
+                        if (result.listOfMaps[index - 1]['cai'] == false) {
+                          // Nếu đang tích (value == true), bỏ tích tất cả checkbox khác của người này
+                          if (value == true) {
+                            // Bỏ tích các checkbox khác
+                            ['win', 'def', 'x2', 'all'].forEach((key) {
+                              if (key != printValue) {
+                                Provider.of<ZiZackController>(context,
+                                        listen: false)
+                                    .setCheckBox(index, key, false);
+                              }
+                            });
+                          }
+                          // Sau đó mới set checkbox hiện tại
                           Provider.of<ZiZackController>(context, listen: false)
                               .setCheckBox(index, printValue, value!);
+                        }
                       },
                     ),
                   ],
@@ -478,9 +493,25 @@ Widget generateDynamicColumnsStatus(
                                 value: result.calPoint[playerIndex]
                                         [printValue] ??
                                     false,
+                                activeColor: AppColors.primaryColor,
+                                checkColor: Colors.white,
                                 onChanged: (bool? value) {
                                   if (result.listOfMaps[playerIndex]['cai'] ==
                                       false) {
+                                    // Nếu đang tích (value == true), bỏ tích tất cả checkbox khác của người này
+                                    if (value == true) {
+                                      // Bỏ tích các checkbox khác
+                                      ['win', 'def', 'x2', 'all']
+                                          .forEach((key) {
+                                        if (key != printValue) {
+                                          Provider.of<ZiZackController>(context,
+                                                  listen: false)
+                                              .setCheckBox(
+                                                  playerIndex + 1, key, false);
+                                        }
+                                      });
+                                    }
+                                    // Sau đó mới set checkbox hiện tại
                                     Provider.of<ZiZackController>(context,
                                             listen: false)
                                         .setCheckBox(playerIndex + 1,

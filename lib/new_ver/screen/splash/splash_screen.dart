@@ -60,25 +60,25 @@ class SplashScreen extends StatelessWidget {
                   ),
                   const Spacer(),
 
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: KSButton(
-                      "Bắt đầu với phiên bản cũ",
-                      backgroundColor: AppColors.lightNeutral10,
-                      onTap: (){
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => HomeScreen(),    ));
-
-                      },
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(16.0),
+                  //   child: KSButton(
+                  //     "Bắt đầu với phiên bản cũ",
+                  //     backgroundColor: AppColors.lightNeutral10,
+                  //     onTap: (){
+                  //       Navigator.of(context).push(MaterialPageRoute(
+                  //           builder: (context) => HomeScreen(),    ));
+                  //
+                  //     },
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: KSButton(
                       "Bắt đầu với phiên bản mới",
                       backgroundColor: AppColors.primaryColor,
                       onTap: (){
-                        Navigator.pushReplacementNamed(context, AppRoute.welcome);
+                        Navigator.pushReplacementNamed(context, AppRoute.home);
 
                       },
                     ),

@@ -208,6 +208,55 @@ Future<BuildContext?> showGameSettingsDialog(BuildContext context) {
                                                                   nameController
                                                                       .text
                                                                       .trim();
+
+                                                              // Kiểm tra tên trống
+                                                              if (newName
+                                                                  .isEmpty) {
+                                                                showCustomAlert(
+                                                                  context,
+                                                                  type: AlertType
+                                                                      .warning,
+                                                                  title:
+                                                                      'Cảnh báo',
+                                                                  message:
+                                                                      'Tên người chơi không được để trống!',
+                                                                );
+                                                                return;
+                                                              }
+
+                                                              // Kiểm tra trùng tên (bỏ qua chính nó)
+                                                              bool isDuplicate =
+                                                                  false;
+                                                              for (int i = 0;
+                                                                  i <
+                                                                      tempPlayerList
+                                                                          .length;
+                                                                  i++) {
+                                                                if (i !=
+                                                                        index &&
+                                                                    tempPlayerList[i]
+                                                                            .toLowerCase() ==
+                                                                        newName
+                                                                            .toLowerCase()) {
+                                                                  isDuplicate =
+                                                                      true;
+                                                                  break;
+                                                                }
+                                                              }
+
+                                                              if (isDuplicate) {
+                                                                showCustomAlert(
+                                                                  context,
+                                                                  type: AlertType
+                                                                      .warning,
+                                                                  title:
+                                                                      'Cảnh báo',
+                                                                  message:
+                                                                      'Tên "$newName" đã tồn tại! Vui lòng chọn tên khác.',
+                                                                );
+                                                                return;
+                                                              }
+
                                                               if (newName
                                                                   .isNotEmpty) {
                                                                 setState(() {
@@ -315,6 +364,37 @@ Future<BuildContext?> showGameSettingsDialog(BuildContext context) {
                                                   onSubmitted: (value) {
                                                     String newName =
                                                         value.trim();
+
+                                                    // Kiểm tra tên trống
+                                                    if (newName.isEmpty) {
+                                                      showCustomAlert(
+                                                        context,
+                                                        type: AlertType.warning,
+                                                        title: 'Cảnh báo',
+                                                        message:
+                                                            'Tên người chơi không được để trống!',
+                                                      );
+                                                      return;
+                                                    }
+
+                                                    // Kiểm tra trùng tên
+                                                    bool isDuplicate =
+                                                        tempPlayerList.any((name) =>
+                                                            name.toLowerCase() ==
+                                                            newName
+                                                                .toLowerCase());
+
+                                                    if (isDuplicate) {
+                                                      showCustomAlert(
+                                                        context,
+                                                        type: AlertType.warning,
+                                                        title: 'Cảnh báo',
+                                                        message:
+                                                            'Tên "$newName" đã tồn tại! Vui lòng chọn tên khác.',
+                                                      );
+                                                      return;
+                                                    }
+
                                                     if (newName.isNotEmpty) {
                                                       setState(() {
                                                         // Thêm vào danh sách tạm
@@ -336,6 +416,37 @@ Future<BuildContext?> showGameSettingsDialog(BuildContext context) {
                                                   String newName =
                                                       addPlayerController.text
                                                           .trim();
+
+                                                  // Kiểm tra tên trống
+                                                  if (newName.isEmpty) {
+                                                    showCustomAlert(
+                                                      context,
+                                                      type: AlertType.warning,
+                                                      title: 'Cảnh báo',
+                                                      message:
+                                                          'Tên người chơi không được để trống!',
+                                                    );
+                                                    return;
+                                                  }
+
+                                                  // Kiểm tra trùng tên
+                                                  bool isDuplicate =
+                                                      tempPlayerList.any((name) =>
+                                                          name.toLowerCase() ==
+                                                          newName
+                                                              .toLowerCase());
+
+                                                  if (isDuplicate) {
+                                                    showCustomAlert(
+                                                      context,
+                                                      type: AlertType.warning,
+                                                      title: 'Cảnh báo',
+                                                      message:
+                                                          'Tên "$newName" đã tồn tại! Vui lòng chọn tên khác.',
+                                                    );
+                                                    return;
+                                                  }
+
                                                   if (newName.isNotEmpty) {
                                                     setState(() {
                                                       // Thêm vào danh sách tạm

@@ -41,6 +41,16 @@ class ZiZackController extends ChangeNotifier {
   int limitValue = 0; // Giá trị giới hạn (số điểm hoặc số ván)
   bool showTotalScore = false; // Hiện tổng điểm khi chơi
 
+  // Chế độ nhập điểm: 0 = Tính điểm & Cài điểm, 1 = Tính tay
+  int inputMode = 1; // Mặc định là Tính tay
+
+  void toggleInputMode() {
+    inputMode = inputMode == 0 ? 1 : 0;
+    notifyListeners();
+    print(
+        '🔄 Đã chuyển sang chế độ: ${inputMode == 0 ? "Tính điểm & Cài điểm" : "Tính tay"}');
+  }
+
   int countEnd = 0;
 
   int selectedIndex = -1;
@@ -231,7 +241,8 @@ class ZiZackController extends ChangeNotifier {
       bool def = false;
       bool x2 = false;
       bool all = false;
-      bool cai = false;
+      // 🎯 Người chơi đầu tiên (id = 0) luôn là "cái" mặc định
+      bool cai = (i == 0);
 
       Map<String, dynamic> currentMap = {
         'id': i,
@@ -261,6 +272,9 @@ class ZiZackController extends ChangeNotifier {
     // Tạo game session mới nếu chưa có
     if (currentSession == null && yourList.isNotEmpty) {
       await createNewGameSession();
+      // In thông báo người chơi đầu tiên là cái
+      print(
+          '🎯 Người chơi đầu tiên "${yourList[0]}" đã được chọn làm CÁI mặc định');
     }
 
     notifyListeners();
@@ -271,8 +285,12 @@ class ZiZackController extends ChangeNotifier {
       listOfMaps[i]["cai"] = false;
     }
     listOfMaps[selectedIndex]["cai"] = true;
-    showAlert(context, 'Thông báo',
-        'Đã chọn ${listOfMaps[selectedIndex]["name"]} làm cái trận này');
+    showCustomAlert(
+      context,
+      type: AlertType.success,
+      title: 'Thông báo',
+      message: 'Đã chọn ${listOfMaps[selectedIndex]["name"]} làm cái trận này',
+    );
     notifyListeners();
   }
 
@@ -611,6 +629,7 @@ class ZiZackController extends ChangeNotifier {
       players.add(Player(
         id: i,
         name: listCharNew[i],
+        isCai: (i == 0), // 🎯 Người chơi đầu tiên là "cái" mặc định
       ));
     }
 

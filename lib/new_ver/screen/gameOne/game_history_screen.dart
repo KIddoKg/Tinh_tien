@@ -291,7 +291,12 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
             onPressed: () {
               controller.deleteGameSession(session.id);
               Navigator.pop(context);
-              showAlert(context, 'Thông báo', 'Đã xóa lịch sử trò chơi');
+              showCustomAlert(
+                context,
+                type: AlertType.success,
+                title: 'Thông báo',
+                message: 'Đã xóa lịch sử trò chơi',
+              );
             },
             child: Text('Xóa', style: TextStyle(color: Colors.white)),
           ),

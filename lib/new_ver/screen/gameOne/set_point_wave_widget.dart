@@ -93,13 +93,15 @@ Future<void> showPopupSetAdd(BuildContext context) {
                                               child: Container(
                                                 height: 50,
                                                 alignment: Alignment.center,
-                                                margin: const EdgeInsets.symmetric(
-                                                    horizontal: 2.0),
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 2.0),
                                                 child: Text(
                                                   result.status[colIndex],
                                                   style: TextStyle(
                                                     fontSize: 17,
-                                                    color: AppColors.primaryColor,
+                                                    color:
+                                                        AppColors.primaryColor,
                                                     fontWeight: FontWeight.w700,
                                                   ),
                                                   textAlign: TextAlign.center,
@@ -133,9 +135,9 @@ Future<void> showPopupSetAdd(BuildContext context) {
                                                 width: 70,
                                                 decoration: BoxDecoration(
                                                   color: result.listOfMaps[
-                                                              playerIndex]
-                                                          ['cai'] ==
-                                                      false
+                                                                  playerIndex]
+                                                              ['cai'] ==
+                                                          false
                                                       ? AppColors.sixColor
                                                       : AppColors.primaryColor,
                                                   border: Border.all(
@@ -143,7 +145,8 @@ Future<void> showPopupSetAdd(BuildContext context) {
                                                     width: 2.0,
                                                   ),
                                                   borderRadius:
-                                                      BorderRadius.circular(10.0),
+                                                      BorderRadius.circular(
+                                                          10.0),
                                                 ),
                                                 alignment: Alignment.center,
                                                 child: Text(
@@ -162,41 +165,49 @@ Future<void> showPopupSetAdd(BuildContext context) {
                                                   children: List.generate(
                                                     result.status.length,
                                                     (colIndex) {
-                                                      String printValue =
-                                                          (colIndex == 0)
-                                                              ? 'win'
-                                                              : (colIndex == 1)
-                                                                  ? 'def'
-                                                                  : (colIndex == 2)
-                                                                      ? 'x2'
+                                                      String printValue = (colIndex ==
+                                                              0)
+                                                          ? 'win'
+                                                          : (colIndex == 1)
+                                                              ? 'def'
+                                                              : (colIndex == 2)
+                                                                  ? 'x2'
+                                                                  : (colIndex ==
+                                                                          3)
+                                                                      ? 'all'
                                                                       : (colIndex ==
-                                                                              3)
-                                                                          ? 'all'
+                                                                              4)
+                                                                          ? 'hue'
                                                                           : '';
                                                       return Expanded(
                                                         child: Container(
                                                           height: 50,
-                                                          margin: const EdgeInsets
-                                                              .symmetric(
-                                                              horizontal: 2.0),
-                                                          decoration: BoxDecoration(
+                                                          margin:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      2.0),
+                                                          decoration:
+                                                              BoxDecoration(
                                                             color: AppColors
                                                                 .sixColor,
                                                             border: Border.all(
-                                                              color: Colors.white,
+                                                              color:
+                                                                  Colors.white,
                                                               width: 2.0,
                                                             ),
                                                             borderRadius:
                                                                 BorderRadius
-                                                                    .circular(10.0),
+                                                                    .circular(
+                                                                        10.0),
                                                           ),
                                                           alignment:
                                                               Alignment.center,
                                                           child: Checkbox(
-                                                            value: result
-                                                                        .calPoint[
-                                                                    playerIndex]
-                                                                [printValue] ??
+                                                            value: result.calPoint[
+                                                                        playerIndex]
+                                                                    [
+                                                                    printValue] ??
                                                                 false,
                                                             activeColor: AppColors
                                                                 .primaryColor,
@@ -216,25 +227,22 @@ Future<void> showPopupSetAdd(BuildContext context) {
                                                                     'win',
                                                                     'def',
                                                                     'x2',
-                                                                    'all'
-                                                                  ].forEach((key) {
+                                                                    'all',
+                                                                    'hue'
+                                                                  ].forEach(
+                                                                      (key) {
                                                                     if (key !=
                                                                         printValue) {
-                                                                      Provider.of<ZiZackController>(
-                                                                              context,
-                                                                              listen:
-                                                                                  false)
-                                                                          .setCheckBox(
-                                                                              playerIndex +
-                                                                                  1,
-                                                                              key,
-                                                                              false);
+                                                                      Provider.of<ZiZackController>(context, listen: false).setCheckBox(
+                                                                          playerIndex +
+                                                                              1,
+                                                                          key,
+                                                                          false);
                                                                     }
                                                                   });
                                                                 }
                                                                 // Sau đó mới set checkbox hiện tại
-                                                                Provider.of<
-                                                                            ZiZackController>(
+                                                                Provider.of<ZiZackController>(
                                                                         context,
                                                                         listen:
                                                                             false)
@@ -311,13 +319,84 @@ Future<void> showPopupSetAdd(BuildContext context) {
                               ),
                               const SizedBox(height: 12),
                               KSButton(
-                                "Chốt sổ",
+                                "Cái x2 toàn sàn",
                                 backgroundColor: AppColors.primaryColor,
                                 onTap: () {
-                                  Navigator.pop(context);
                                   final controller =
                                       Provider.of<ZiZackController>(context,
                                           listen: false);
+
+                                  // Set checkbox "all" (x2 đền) cho tất cả người chơi không phải cái
+                                  controller.setCheckAllCaiX2(
+                                      result.listOfMaps.length, true);
+
+                                  // Đóng popup
+                                  Navigator.pop(context);
+
+                                  // Tính điểm và kết thúc ván
+                                  controller.calculateEndForMaps();
+
+                                  // Kiểm tra xem có đạt điều kiện kết thúc không
+                                  if (controller.checkGameEndCondition()) {
+                                    // Hiển thị dialog kết thúc game
+                                    Future.delayed(Duration(milliseconds: 300),
+                                        () {
+                                      showEndGameDialog(context);
+                                    });
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              KSButton(
+                                "Chốt sổ",
+                                backgroundColor: AppColors.primaryColor,
+                                onTap: () {
+                                  final controller =
+                                      Provider.of<ZiZackController>(context,
+                                          listen: false);
+
+                                  // Kiểm tra tất cả người chơi (không phải cái) phải có ít nhất 1 checkbox được tích
+                                  bool allPlayersHaveSelection = true;
+                                  List<String> playersWithoutSelection = [];
+
+                                  for (int i = 0;
+                                      i < controller.listCharNew.length;
+                                      i++) {
+                                    // Bỏ qua người chơi là cái
+                                    if (controller.listOfMaps[i]['cai'] ==
+                                        true) {
+                                      continue;
+                                    }
+
+                                    // Kiểm tra xem người chơi này có ít nhất 1 checkbox được tích không
+                                    bool hasSelection = false;
+                                    ['win', 'def', 'x2', 'all', 'hue']
+                                        .forEach((key) {
+                                      if (controller.calPoint[i][key] == true) {
+                                        hasSelection = true;
+                                      }
+                                    });
+
+                                    if (!hasSelection) {
+                                      allPlayersHaveSelection = false;
+                                      playersWithoutSelection
+                                          .add(controller.listCharNew[i]);
+                                    }
+                                  }
+
+                                  if (!allPlayersHaveSelection) {
+                                    // Hiển thị thông báo lỗi
+                                    showCustomAlert(
+                                      context,
+                                      type: AlertType.warning,
+                                      title: 'Thiếu thông tin',
+                                      message:
+                                          'Các người chơi sau chưa chọn kết quả:\n${playersWithoutSelection.join(", ")}\n\nVui lòng chọn ít nhất 1 ô cho mỗi người chơi!',
+                                    );
+                                    return;
+                                  }
+
+                                  Navigator.pop(context);
                                   controller.calculateEndForMaps();
 
                                   // Kiểm tra xem có đạt điều kiện kết thúc không
@@ -564,7 +643,9 @@ Widget generateColumnStatus(
                       ? 'x2'
                       : (col == 3)
                           ? 'all'
-                          : '';
+                          : (col == 4)
+                              ? 'hue'
+                              : '';
           return Padding(
             padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
             child: Container(
@@ -591,7 +672,7 @@ Widget generateColumnStatus(
                           // Nếu đang tích (value == true), bỏ tích tất cả checkbox khác của người này
                           if (value == true) {
                             // Bỏ tích các checkbox khác
-                            ['win', 'def', 'x2', 'all'].forEach((key) {
+                            ['win', 'def', 'x2', 'all', 'hue'].forEach((key) {
                               if (key != printValue) {
                                 Provider.of<ZiZackController>(context,
                                         listen: false)
@@ -669,7 +750,9 @@ Widget generateDynamicColumnsStatus(
                                       ? 'x2'
                                       : (colIndex == 3)
                                           ? 'all'
-                                          : '';
+                                          : (colIndex == 4)
+                                              ? 'hue'
+                                              : '';
                           return Expanded(
                             child: Container(
                               height: 50,
@@ -696,7 +779,7 @@ Widget generateDynamicColumnsStatus(
                                     // Nếu đang tích (value == true), bỏ tích tất cả checkbox khác của người này
                                     if (value == true) {
                                       // Bỏ tích các checkbox khác
-                                      ['win', 'def', 'x2', 'all']
+                                      ['win', 'def', 'x2', 'all', 'hue']
                                           .forEach((key) {
                                         if (key != printValue) {
                                           Provider.of<ZiZackController>(context,

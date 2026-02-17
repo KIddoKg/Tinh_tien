@@ -926,10 +926,10 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                         children: [
                           Padding(
                             padding:
-                                const EdgeInsets.all(8.0).copyWith(top: 24),
+                                const EdgeInsets.all(8.0).copyWith(top: 8),
                             child: Container(
                               width: 60, // Độ rộng của hình chữ nhật
-                              height: 10, // Chiều cao của hình chữ nhật
+                              height: 8, // Chiều cao của hình chữ nhật
                               decoration: BoxDecoration(
                                 color: Colors.grey,
                                 // Màu nền của hình chữ nhật
@@ -1227,7 +1227,7 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                                                     fontWeight: FontWeight.w500,
                                                     color:
                                                         AppColors.primaryColor,
-                                                    fontSize: 24),
+                                                    fontSize: 20),
                                               ),
                                             ),
                                             AnimatedToggle(

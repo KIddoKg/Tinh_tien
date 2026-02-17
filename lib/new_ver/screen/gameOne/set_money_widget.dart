@@ -28,14 +28,14 @@ Future<BuildContext?> showPopupSetPoint(BuildContext context) {
                     color:
                         Colors.white, // Đổi từ decoration sang color đơn giản
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.only(left: 16.0 , right: 16),
                       child: Column(
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Container(
                               width: 60, // Độ rộng của hình chữ nhật
-                              height: 10, // Chiều cao của hình chữ nhật
+                              height: 8, // Chiều cao của hình chữ nhật
                               decoration: BoxDecoration(
                                 color: Colors.grey,
                                 // Màu nền của hình chữ nhật

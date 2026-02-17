@@ -11,7 +11,7 @@ class ZiZackController extends ChangeNotifier {
     return instance;
   }
 
-  List<String> status = ["Ăn", "Thua", "X2", "Đền"];
+  List<String> status = ["Ăn", "Thua", "X2", "Đền", "Huề"];
 
   ZiZackController._internal();
 
@@ -135,6 +135,7 @@ class ZiZackController extends ChangeNotifier {
       'def': false,
       'x2': false,
       'all': false,
+      'hue': false,
     };
     calPoint.add(newCalPoint);
 
@@ -259,6 +260,7 @@ class ZiZackController extends ChangeNotifier {
         'def': def,
         'x2': x2,
         'all': all,
+        'hue': false,
       };
       listOfMaps.add(currentMap);
       // currentMap['nowPoint'] = nowPoint;
@@ -377,6 +379,18 @@ class ZiZackController extends ChangeNotifier {
     notifyListeners();
   }
 
+  setCheckAllCaiX2(int index, bool value) {
+    calPoint = calPoint.map((map) {
+      return updateFieldsToFalseExceptId(map);
+    }).toList();
+    for (int i = 0; i < index; i++) {
+      if (listOfMaps[i]['cai'] == false) {
+        calPoint[i]["x2"] = value; // X2 đền - trừ gấp đôi số điểm đặt
+      }
+    }
+    notifyListeners();
+  }
+
   Map<String, dynamic> updateFieldsToFalseExceptId(Map<String, dynamic> map) {
     return map.map((key, value) => MapEntry(key, key == 'id' ? value : false));
   }
@@ -443,6 +457,8 @@ class ZiZackController extends ChangeNotifier {
           z = i;
           pointden = pointValue;
           currentMap['nowPoint'].add(-pointValue);
+        } else if (currentMapPoint['hue']) {
+          currentMap['nowPoint'].add(0); // Huề = không ăn không thua
         }
         if (currentMap['cai'] == true) {
           currentMap['nowPoint'].add(0);
@@ -846,6 +862,7 @@ class ZiZackController extends ChangeNotifier {
           'def': false,
           'x2': false,
           'all': false,
+          'hue': false,
         };
 
         listOfMaps.add(currentMap);

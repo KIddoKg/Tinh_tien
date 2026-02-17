@@ -4,6 +4,7 @@ import 'package:Xi_Zach/router.dart';
 import 'package:Xi_Zach/router/route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'home_screen.dart';
 import 'package:sizer/sizer.dart';
 import 'new_ver/screen/splash/splash_screen.dart';
@@ -35,6 +36,8 @@ class MyApp extends StatelessWidget {
     return   Sizer(builder: (context, orientation, screenType) {
         return MaterialApp(
           title: 'App Tinh tien',
+          builder: BotToastInit(),
+          navigatorObservers: [BotToastNavigatorObserver()],
           // theme: AppTheme.myThemeData,
           // home: const WelcomeScreen(),
           home: const SplashScreen(),

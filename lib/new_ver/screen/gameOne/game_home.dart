@@ -29,6 +29,8 @@ class _HomeZiZachState extends State<HomeZiZach> {
   bool switchValue = false;
   FlexGridSource source = FlexGridSource();
   ScrollController _horizontalScrollController = ScrollController();
+  ScrollController _verticalScrollController =
+      ScrollController(); // Scroll dọc đồng bộ
 
   List<int> calculateSumForEachList(List<List<int>> listOfLists) {
     if (listOfLists.isEmpty) {
@@ -69,6 +71,7 @@ class _HomeZiZachState extends State<HomeZiZach> {
   @override
   void dispose() {
     _horizontalScrollController.dispose();
+    _verticalScrollController.dispose();
     super.dispose();
   }
 
@@ -275,217 +278,138 @@ class _HomeZiZachState extends State<HomeZiZach> {
                   ),
                 // Toàn bộ table với scroll đồng bộ
                 Expanded(
-                  child: Row(
-                    children: [
-                      // Cột label bên trái (cố định)
-                      Column(
+                  child: SingleChildScrollView(
+                    controller: _verticalScrollController,
+                    child: SingleChildScrollView(
+                      controller: _horizontalScrollController,
+                      scrollDirection: Axis.horizontal,
+                      child: Column(
                         children: [
-                          // Header "Tên:"
-                          Container(
-                            height: 60,
-                            width: 60,
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Text(
-                                "Tên:",
-                                style: TextStyle(
-                                    fontSize: 17,
-                                    color: AppColors.primaryColor,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ),
-                          // Các label "Ván X"
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: result.point
-                                    .asMap()
-                                    .entries
-                                    .map((vanEntry) {
-                                  final int vanIndex = vanEntry.key;
-                                  return Container(
-                                    height: 60,
-                                    width: 60,
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: Center(
+                          // Header row - Tên người chơi
+                          Row(
+                            children:
+                                result.listCharNew.asMap().entries.map((entry) {
+                              final int playerIndex = entry.key;
+                              final String name = entry.value;
+                              final int totalScore = result.point.isEmpty
+                                  ? 0
+                                  : calculateSumForEachList(
+                                      result.point)[playerIndex];
+
+                              return Container(
+                                height: 60,
+                                width: 80,
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 2.0, vertical: 4.0),
+                                decoration: BoxDecoration(
+                                  color: result.listOfMaps[playerIndex]
+                                              ['cai'] ==
+                                          false
+                                      ? AppColors.sixColor
+                                      : AppColors.primaryColor,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    // Tên chính ở giữa
+                                    Center(
                                       child: Text(
-                                        "Ván ${vanIndex + 1}:",
+                                        name,
                                         style: TextStyle(
-                                            fontSize: 14,
-                                            color: AppColors.primaryColor,
-                                            fontWeight: FontWeight.w700),
+                                          fontSize: 16,
+                                          color: AppColors.whiteBg,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                          // Label "Tổng:"
-                          if (result.showTotalScore)
-                            Container(
-                              height: 60,
-                              width: 60,
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: Text(
-                                  "Tổng:",
-                                  style: TextStyle(
-                                      fontSize: 17,
-                                      color: AppColors.primaryColor,
-                                      fontWeight: FontWeight.w700),
+                                    // Tổng điểm nhỏ ở góc dưới phải
+                                    if (result.showTotalScore &&
+                                        result.point.isNotEmpty)
+                                      Positioned(
+                                        bottom: 2,
+                                        right: 4,
+                                        child: Text(
+                                          "$totalScore",
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: AppColors.whiteBg
+                                                .withOpacity(0.8),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                              ),
-                            ),
+                              );
+                            }).toList(),
+                          ),
+                          // Body - Điểm các ván
+                          ...result.point.asMap().entries.map((vanEntry) {
+                            final int vanIndex = vanEntry.key;
+                            final List<int> vanScores = vanEntry.value;
+
+                            return Row(
+                              children: result.listCharNew
+                                  .asMap()
+                                  .entries
+                                  .map((playerEntry) {
+                                final int playerIndex = playerEntry.key;
+                                final int score = vanScores[playerIndex];
+
+                                return Container(
+                                  height: 60,
+                                  width: 80,
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 2.0, vertical: 4.0),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.sixColor.withOpacity(0.7),
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2.0,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      // Số ván nhỏ ở góc trên bên trái
+                                      Positioned(
+                                        top: 2,
+                                        left: 4,
+                                        child: Text(
+                                          "${vanIndex + 1}",
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: AppColors.whiteBg
+                                                .withOpacity(0.6),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      // Điểm chính ở giữa
+                                      Center(
+                                        child: Text(
+                                          score == 0 ? "0" : "$score",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: AppColors.whiteBg,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          }).toList(),
                         ],
                       ),
-                      // Cột dữ liệu scroll ngang
-                      Expanded(
-                        child: SingleChildScrollView(
-                          controller: _horizontalScrollController,
-                          scrollDirection: Axis.horizontal,
-                          child: Column(
-                            children: [
-                              // Hàng tên người chơi
-                              Container(
-                                height: 60,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Row(
-                                  children: result.listCharNew
-                                      .asMap()
-                                      .entries
-                                      .map((entry) {
-                                    final int index = entry.key;
-                                    final String name = entry.value;
-                                    return Container(
-                                      width: 80,
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 2.0),
-                                      decoration: BoxDecoration(
-                                        color: result.listOfMaps[index]
-                                                    ['cai'] ==
-                                                false
-                                            ? AppColors.sixColor
-                                            : AppColors.primaryColor,
-                                        border: Border.all(
-                                          color: Colors.white,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          name,
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              color: AppColors.whiteBg,
-                                              fontWeight: FontWeight.w700),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                              // Các hàng điểm
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    children: result.point
-                                        .asMap()
-                                        .entries
-                                        .map((vanEntry) {
-                                      final List<int> vanScores =
-                                          vanEntry.value;
-                                      return Container(
-                                        height: 60,
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 4.0),
-                                        child: Row(
-                                          children: vanScores
-                                              .asMap()
-                                              .entries
-                                              .map((scoreEntry) {
-                                            final int score = scoreEntry.value;
-                                            return Container(
-                                              width: 80,
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 2.0),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.sixColor,
-                                                border: Border.all(
-                                                  color: Colors.white,
-                                                  width: 2.0,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  score == 0 ? "0" : "$score",
-                                                  style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: AppColors.whiteBg,
-                                                      fontWeight:
-                                                          FontWeight.w700),
-                                                ),
-                                              ),
-                                            );
-                                          }).toList(),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
-                              // Hàng tổng điểm
-                              if (result.showTotalScore)
-                                Container(
-                                  height: 60,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: Row(
-                                    children:
-                                        calculateSumForEachList(result.point)
-                                            .asMap()
-                                            .entries
-                                            .map((entry) {
-                                      final int sum = entry.value;
-                                      return Container(
-                                        width: 80,
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 2.0),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryColor,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                            width: 2.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            sum == 0 ? "0" : "$sum",
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                color: AppColors.whiteBg,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
 

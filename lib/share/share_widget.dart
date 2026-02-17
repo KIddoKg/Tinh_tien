@@ -100,7 +100,7 @@ class KSButton extends StatelessWidget {
           }
 
           FocusScope.of(context).unfocus();
-          loadDataWithLoading();
+          // loadDataWithLoading();
           onTap?.call();
         },
         child: Padding(

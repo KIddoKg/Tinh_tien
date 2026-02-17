@@ -87,11 +87,11 @@ class HomeScreen extends StatelessWidget {
                     //   ],
                     // ),
                     child: Container(
-                      height: 32,
+                      height: 0,
                     ),
                   ),
                   const Padding(
-                    padding: EdgeInsets.only(top: 10),
+                    padding: EdgeInsets.only(top: 0),
                     child: Text(
                       'Chọn chế độ chơi nào',
                       textAlign: TextAlign.center,

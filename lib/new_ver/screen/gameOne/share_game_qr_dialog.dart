@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../share/app_styles.dart';
@@ -39,7 +40,8 @@ Future<void> showShareGameQRDialog(BuildContext context) async {
                 // Title
                 Row(
                   children: [
-                    Icon(Icons.qr_code_2, color: AppColors.primaryColor, size: 28),
+                    Icon(Icons.qr_code_2,
+                        color: AppColors.primaryColor, size: 28),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -76,7 +78,9 @@ Future<void> showShareGameQRDialog(BuildContext context) async {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.primaryColor.withOpacity(0.3), width: 2),
+                    border: Border.all(
+                        color: AppColors.primaryColor.withOpacity(0.3),
+                        width: 2),
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primaryColor.withOpacity(0.1),
@@ -104,23 +108,67 @@ Future<void> showShareGameQRDialog(BuildContext context) async {
                   ),
                   child: Column(
                     children: [
-                      _buildInfoRow(Icons.people, 'Người chơi', '${controller.listCharNew.length} người'),
+                      _buildInfoRow(Icons.people, 'Người chơi',
+                          '${controller.listCharNew.length} người'),
                       SizedBox(height: 8),
-                      _buildInfoRow(Icons.confirmation_number, 'Số ván', '${controller.point.length} ván'),
-                      if (controller.fOrc == 1 && controller.limitValue > 0) ...[
+                      _buildInfoRow(Icons.confirmation_number, 'Số ván',
+                          '${controller.point.length} ván'),
+                      if (controller.fOrc == 1 &&
+                          controller.limitValue > 0) ...[
                         SizedBox(height: 8),
                         _buildInfoRow(
                           Icons.flag,
                           'Giới hạn',
-                          controller.dOrv == 0 
-                            ? '${controller.limitValue} điểm'
-                            : '${controller.limitValue} ván',
+                          controller.dOrv == 0
+                              ? '${controller.limitValue} điểm'
+                              : '${controller.limitValue} ván',
                         ),
                       ],
                     ],
                   ),
                 ),
                 SizedBox(height: 20),
+
+                // Copy Link button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: qrData));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text('Đã copy link vào clipboard!'),
+                            ],
+                          ),
+                          backgroundColor: Colors.green,
+                          duration: Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.copy),
+                    label: Text(
+                      'Copy Link',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primaryColor,
+                      side: BorderSide(color: AppColors.primaryColor, width: 2),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 12),
 
                 // Close button
                 SizedBox(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:provider/provider.dart';
 import '../../../share/app_styles.dart';
@@ -12,16 +14,34 @@ class ScanGameQRScreen extends StatefulWidget {
   State<ScanGameQRScreen> createState() => _ScanGameQRScreenState();
 }
 
-class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
+class _ScanGameQRScreenState extends State<ScanGameQRScreen>
+    with WidgetsBindingObserver {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
   bool isProcessing = false;
   bool flashOn = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (controller == null || kIsWeb) return; // Skip trên web vì không support
+
+    if (state == AppLifecycleState.inactive) {
+      controller!.pauseCamera();
+    } else if (state == AppLifecycleState.resumed) {
+      controller!.resumeCamera();
+    }
+  }
+
+  @override
   void reassemble() {
     super.reassemble();
-    if (controller != null) {
+    if (controller != null && !kIsWeb) {
       controller!.pauseCamera();
       controller!.resumeCamera();
     }
@@ -29,7 +49,9 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
 
   @override
   void dispose() {
-    controller?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    // Không cần dispose controller nữa - auto dispose
+    // controller?.dispose();
     super.dispose();
   }
 
@@ -40,7 +62,7 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
 
     controller!.scannedDataStream.listen((scanData) async {
       if (isProcessing) return;
-      
+
       final String? code = scanData.code;
       if (code == null || code.isEmpty) return;
 
@@ -48,25 +70,45 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
         isProcessing = true;
       });
 
-      // Pause camera
-      await controller!.pauseCamera();
+      // Pause camera để tránh scan nhiều lần (chỉ trên mobile)
+      if (!kIsWeb) {
+        controller!.pauseCamera();
+      }
 
       // Import game
-      final gameController = Provider.of<ZiZackController>(context, listen: false);
+      final gameController =
+          Provider.of<ZiZackController>(context, listen: false);
       bool success = await gameController.importGameFromQR(code);
 
       if (!mounted) return;
 
       if (success) {
-        showCustomAlert(
-          context,
-          type: AlertType.success,
-          title: 'Thành công',
-          message: 'Đã load ván chơi từ QR code!\nBạn có thể tiếp tục chơi ngay.',
-          onConfirm: () {
-            Navigator.pop(context); // Đóng alert
-            Navigator.pop(context, true); // Đóng scan screen
-          },
+        // Import thành công
+        // Đợi một chút để đảm bảo data đã được lưu
+        await Future.delayed(Duration(milliseconds: 300));
+
+        if (!mounted) return;
+
+        // Đóng scan screen
+        Navigator.pop(context);
+
+        // Hiển thị thông báo thành công
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                      'Đã load ván chơi từ QR code!\nKiểm tra trong lịch sử.'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       } else {
         showCustomAlert(
@@ -75,10 +117,14 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
           title: 'Lỗi',
           message: 'Mã QR không hợp lệ hoặc đã hết hạn.\nVui lòng thử lại!',
           onConfirm: () {
+            if (!mounted) return;
             setState(() {
               isProcessing = false;
             });
-            controller?.resumeCamera();
+            // Resume camera chỉ trên mobile
+            if (!kIsWeb) {
+              controller?.resumeCamera();
+            }
           },
         );
       }
@@ -91,6 +137,104 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
       setState(() {
         flashOn = !flashOn;
       });
+    }
+  }
+
+  void _pasteAndImportLink() async {
+    try {
+      // Lấy dữ liệu từ clipboard
+      ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+
+      if (data == null || data.text == null || data.text!.isEmpty) {
+        if (!mounted) return;
+        showCustomAlert(
+          context,
+          type: AlertType.warning,
+          title: 'Clipboard trống',
+          message: 'Clipboard không có dữ liệu!\nHãy copy link trước khi dán.',
+        );
+        return;
+      }
+
+      setState(() {
+        isProcessing = true;
+      });
+
+      // Pause camera nếu đang chạy
+      if (!kIsWeb && controller != null) {
+        controller!.pauseCamera();
+      }
+
+      // Import game từ link
+      final gameController =
+          Provider.of<ZiZackController>(context, listen: false);
+      bool success = await gameController.importGameFromQR(data.text!);
+
+      if (!mounted) return;
+
+      if (success) {
+        // Import thành công
+        // Đợi một chút để đảm bảo data đã được lưu
+        await Future.delayed(Duration(milliseconds: 300));
+
+        if (!mounted) return;
+
+        // Đóng scan screen
+        Navigator.pop(context);
+
+        // Hiển thị thông báo thành công
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                      'Đã load ván chơi từ link!\nKiểm tra trong lịch sử.'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        showCustomAlert(
+          context,
+          type: AlertType.error,
+          title: 'Lỗi',
+          message: 'Link không hợp lệ hoặc đã hết hạn.\nVui lòng thử lại!',
+          onConfirm: () {
+            if (!mounted) return;
+            setState(() {
+              isProcessing = false;
+            });
+            // Resume camera
+            if (!kIsWeb && controller != null) {
+              controller!.resumeCamera();
+            }
+          },
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isProcessing = false;
+      });
+
+      showCustomAlert(
+        context,
+        type: AlertType.error,
+        title: 'Lỗi',
+        message: 'Không thể đọc clipboard: $e',
+        onConfirm: () {
+          if (!kIsWeb && controller != null) {
+            controller!.resumeCamera();
+          }
+        },
+      );
     }
   }
 
@@ -131,6 +275,18 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
               borderWidth: 6,
               cutOutSize: 300,
             ),
+            // Thêm các cấu hình để cải thiện hiệu suất scan
+            formatsAllowed: const [BarcodeFormat.qrcode],
+            onPermissionSet: (ctrl, hasPermission) {
+              if (!hasPermission) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Cần cấp quyền camera để quét QR'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
           ),
 
           // Instructions
@@ -177,6 +333,34 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
                     textAlign: TextAlign.center,
                   ),
                 ],
+              ),
+            ),
+          ),
+
+          // Paste Link button
+          Positioned(
+            bottom: 30,
+            left: 20,
+            right: 20,
+            child: ElevatedButton.icon(
+              onPressed: isProcessing ? null : _pasteAndImportLink,
+              icon: Icon(Icons.content_paste, size: 20),
+              label: Text(
+                'Dán Link',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primaryColor,
+                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 8,
+                shadowColor: Colors.black.withOpacity(0.3),
               ),
             ),
           ),

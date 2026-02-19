@@ -810,8 +810,7 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                       child: Column(
                         children: [
                           Padding(
-                            padding:
-                                const EdgeInsets.all(8.0).copyWith(top: 8),
+                            padding: const EdgeInsets.all(8.0).copyWith(top: 8),
                             child: Container(
                               width: 60, // Độ rộng của hình chữ nhật
                               height: 8, // Chiều cao của hình chữ nhật
@@ -1757,7 +1756,7 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
   // Dialog nhập QR code bằng text (cho web không có HTTPS)
   void _showInputQRDialog(BuildContext context) {
     final TextEditingController qrController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -1795,7 +1794,8 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+                  borderSide:
+                      BorderSide(color: AppColors.primaryColor, width: 2),
                 ),
               ),
             ),
@@ -1838,7 +1838,7 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
             ),
             onPressed: () async {
               String qrData = qrController.text.trim();
-              
+
               if (qrData.isEmpty) {
                 showCustomAlert(
                   dialogContext,
@@ -1850,7 +1850,8 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
               }
 
               // Import game từ QR data
-              final controller = Provider.of<ZiZackController>(context, listen: false);
+              final controller =
+                  Provider.of<ZiZackController>(context, listen: false);
               bool success = await controller.importGameFromQR(qrData);
 
               qrController.dispose();
@@ -1861,7 +1862,8 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                   context,
                   type: AlertType.success,
                   title: 'Thành công',
-                  message: 'Đã tải game thành công! Bấm "Bắt đầu thôi" để chơi.',
+                  message:
+                      'Đã tải game thành công! Bấm "Bắt đầu thôi" để chơi.',
                 );
               } else {
                 showCustomAlert(

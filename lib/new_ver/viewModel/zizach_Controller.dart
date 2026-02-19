@@ -234,6 +234,8 @@ class ZiZackController extends ChangeNotifier {
   Future<void> initSt() async {
     calPoint = [];
     listOfMaps = [];
+    setMoneyPoints.clear(); // 🔥 Clear điểm "Cài điểm" khi bắt đầu game mới
+    
     // Access the listCharNew
     List<String> yourList = await loadListCharNew();
     print("dđ${yourList}");
@@ -761,7 +763,8 @@ class ZiZackController extends ChangeNotifier {
       'limitValue': limitValue,
       'showTotalScore': showTotalScore,
       'inputMode': inputMode,
-      'setMoneyPoints': setMoneyPoints.map((key, value) => MapEntry(key.toString(), value)),
+      'setMoneyPoints':
+          setMoneyPoints.map((key, value) => MapEntry(key.toString(), value)),
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
 
@@ -796,7 +799,7 @@ class ZiZackController extends ChangeNotifier {
 
       // Import data
       listCharNew = List<String>.from(gameData['listCharNew']);
-      
+
       // Rebuild listOfMaps
       List<dynamic> importedMaps = gameData['listOfMaps'];
       for (var mapData in importedMaps) {
@@ -824,7 +827,8 @@ class ZiZackController extends ChangeNotifier {
       // Import setMoneyPoints
       if (gameData['setMoneyPoints'] != null) {
         Map<String, dynamic> moneyPoints = gameData['setMoneyPoints'];
-        setMoneyPoints = moneyPoints.map((key, value) => MapEntry(int.parse(key), value.toString()));
+        setMoneyPoints = moneyPoints
+            .map((key, value) => MapEntry(int.parse(key), value.toString()));
       }
 
       // Rebuild calPoint
@@ -843,8 +847,14 @@ class ZiZackController extends ChangeNotifier {
       print('   Người chơi: ${listCharNew.length}');
       print('   Số ván đã chơi: ${point.length}');
 
-      // Save to current session
+      // Tạo session mới
       await createNewGameSession();
+
+      // LƯU session vào game history
+      await saveCurrentSession();
+
+      // Refresh game history để hiển thị trong UI
+      await refreshGameHistory();
 
       notifyListeners();
       return true;
@@ -1180,6 +1190,7 @@ class ZiZackController extends ChangeNotifier {
     listOfMaps.clear();
     calPoint.clear();
     listCharNew.clear();
+    setMoneyPoints.clear(); // 🔥 Clear điểm "Cài điểm"
     selectedIndex = -1;
     currentSession = null;
 

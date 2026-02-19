@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 import '../../share/share_widget.dart';
 import '../model/game_model.dart';
@@ -44,11 +45,14 @@ class ZiZackController extends ChangeNotifier {
   // Chế độ nhập điểm: 0 = Tính điểm & Cài điểm, 1 = Tính tay
   int inputMode = 1; // Mặc định là Tính tay
 
+  // Lưu trữ điểm "Cài điểm" riêng biệt để không bị reset khi đổi chế độ
+  Map<int, String> setMoneyPoints = {};
+
   void toggleInputMode() {
     inputMode = inputMode == 0 ? 1 : 0;
-    notifyListeners();
     print(
         '🔄 Đã chuyển sang chế độ: ${inputMode == 0 ? "Tính điểm & Cài điểm" : "Tính tay"}');
+    notifyListeners();
   }
 
   int countEnd = 0;
@@ -352,6 +356,47 @@ class ZiZackController extends ChangeNotifier {
     }
   }
 
+  // Các hàm quản lý setMoneyPoints (điểm Cài điểm)
+  String getSetMoneyPoint(int index) {
+    return setMoneyPoints[index] ?? '';
+  }
+
+  void updateSetMoneyPoint(int index, String value) {
+    setMoneyPoints[index] = value;
+    notifyListeners();
+  }
+
+  void appendToSetMoney(int index, String value) {
+    String current = setMoneyPoints[index] ?? '';
+    setMoneyPoints[index] = current + value;
+    notifyListeners();
+  }
+
+  void deleteLastSetMoney(int index) {
+    String current = setMoneyPoints[index] ?? '';
+    if (current.isNotEmpty) {
+      setMoneyPoints[index] = current.substring(0, current.length - 1);
+      notifyListeners();
+    }
+  }
+
+  void toggleSetMoneySign(int index) {
+    String current = setMoneyPoints[index] ?? '';
+    if (current.isNotEmpty && current != '0') {
+      if (current.startsWith('-')) {
+        setMoneyPoints[index] = current.substring(1);
+      } else {
+        setMoneyPoints[index] = '-' + current;
+      }
+      notifyListeners();
+    }
+  }
+
+  void clearSetMoneyPoints() {
+    setMoneyPoints.clear();
+    notifyListeners();
+  }
+
   setCheckBox(int index, String printValue, bool value) {
     calPoint[index - 1][printValue] = value;
 
@@ -385,9 +430,63 @@ class ZiZackController extends ChangeNotifier {
     }).toList();
     for (int i = 0; i < index; i++) {
       if (listOfMaps[i]['cai'] == false) {
-        calPoint[i]["x2"] = value; // X2 đền - trừ gấp đôi số điểm đặt
+        calPoint[i]["all"] = value; // "Đền" checkbox - trừ gấp đôi điểm
       }
     }
+    notifyListeners();
+  }
+
+  // Hàm riêng cho "Cái x2 toàn sàn" - Tất cả Dân bị trừ x2 điểm, Cái ăn tất
+  void calculateCaiX2ToanSan() {
+    print('🎯 calculateCaiX2ToanSan - START');
+
+    List<int> roundPoints = [];
+    int caiIndex = -1;
+    int totalDanLoss = 0; // Tổng điểm Dân bị trừ (x2)
+
+    // Tìm Cái và tính điểm cho từng người
+    for (int i = 0; i < listOfMaps.length; i++) {
+      Map<String, dynamic> currentMap = listOfMaps[i];
+      int pointValue = int.tryParse(setMoneyPoints[i] ?? '0') ?? 0;
+
+      if (currentMap['cai'] == true) {
+        // Cái - tạm thời set = 0, sẽ tính sau
+        caiIndex = i;
+        roundPoints.add(0);
+        currentMap['nowPoint'].add(0);
+      } else {
+        // Dân - bị trừ x2 điểm
+        int loss = pointValue * 2;
+        roundPoints.add(-loss);
+        currentMap['nowPoint'].add(-loss);
+        totalDanLoss += loss;
+      }
+    }
+
+    // Cái ăn toàn bộ số điểm Dân bị trừ
+    if (caiIndex != -1) {
+      roundPoints[caiIndex] = totalDanLoss;
+      listOfMaps[caiIndex]['nowPoint']
+          [listOfMaps[caiIndex]['nowPoint'].length - 1] = totalDanLoss;
+    }
+
+    // Lưu vào point[][]
+    point.add(List.from(roundPoints));
+
+    // Reset checkbox về trạng thái ban đầu
+    calPoint = calPoint.map((map) {
+      return updateFieldsToFalseExceptId(map);
+    }).toList();
+
+    print('📊 Kết quả Cái x2 toàn sàn: $roundPoints');
+    print('   Cái ăn: +$totalDanLoss');
+
+    // Lưu session
+    saveCurrentSession();
+
+    // Kiểm tra điều kiện kết thúc
+    checkGameEndCondition();
+
     notifyListeners();
   }
 
@@ -445,7 +544,8 @@ class ZiZackController extends ChangeNotifier {
       Map<String, dynamic> currentMapPoint = calPoint[i];
 
       if (currentMap['id'] == currentMapPoint['id']) {
-        int pointValue = int.tryParse(currentMap['point'] ?? '0') ?? 0;
+        // Sử dụng setMoneyPoints thay vì listOfMaps[i]['point']
+        int pointValue = int.tryParse(setMoneyPoints[i] ?? '0') ?? 0;
 
         if (currentMapPoint['win']) {
           currentMap['nowPoint'].add(pointValue);
@@ -454,9 +554,10 @@ class ZiZackController extends ChangeNotifier {
         } else if (currentMapPoint['x2']) {
           currentMap['nowPoint'].add(pointValue * 2);
         } else if (currentMapPoint['all']) {
+          // "Đền" checkbox - bị trừ tiền cược + đền thêm cho người ăn (tính sau)
           z = i;
-          pointden = pointValue;
-          currentMap['nowPoint'].add(-pointValue);
+          pointden = pointValue; // Lưu số tiền cược
+          currentMap['nowPoint'].add(-pointValue); // Trừ 1 lần tiền cược
         } else if (currentMapPoint['hue']) {
           currentMap['nowPoint'].add(0); // Huề = không ăn không thua
         }
@@ -541,6 +642,12 @@ class ZiZackController extends ChangeNotifier {
 
     point.add(List.from(y));
     print(point);
+
+    // Reset lại điểm Tính tay (listOfMaps['point']) sau khi tính toán xong
+    // KHÔNG reset setMoneyPoints để giữ điểm Cài điểm cho các ván tiếp theo
+    for (int i = 0; i < listOfMaps.length; i++) {
+      listOfMaps[i]['point'] = '';
+    }
 
     calPoint = calPoint.map((map) {
       return updateFieldsToFalseExceptId(map);
@@ -627,6 +734,124 @@ class ZiZackController extends ChangeNotifier {
     }
 
     return false;
+  }
+
+  // === QR CODE SHARE GAME METHODS ===
+
+  /// Export game hiện tại thành JSON string để tạo QR code
+  String exportGameToQR() {
+    if (point.isEmpty) {
+      throw Exception('Không có ván nào để chia sẻ!');
+    }
+
+    Map<String, dynamic> gameData = {
+      'version': '1.0', // Version để tương thích sau này
+      'listCharNew': listCharNew,
+      'listOfMaps': listOfMaps.map((map) {
+        return {
+          'id': map['id'],
+          'cai': map['cai'],
+          'point': map['point'] ?? '',
+          'nowPoint': List<int>.from(map['nowPoint'] ?? []),
+        };
+      }).toList(),
+      'point': point,
+      'fOrc': fOrc,
+      'dOrv': dOrv,
+      'limitValue': limitValue,
+      'showTotalScore': showTotalScore,
+      'inputMode': inputMode,
+      'setMoneyPoints': setMoneyPoints.map((key, value) => MapEntry(key.toString(), value)),
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    };
+
+    String jsonString = jsonEncode(gameData);
+    print('📤 Export game to QR: ${jsonString.length} bytes');
+    return jsonString;
+  }
+
+  /// Import game từ QR code JSON string
+  Future<bool> importGameFromQR(String qrData) async {
+    try {
+      Map<String, dynamic> gameData = jsonDecode(qrData);
+
+      // Validate version
+      if (gameData['version'] != '1.0') {
+        print('⚠️ QR code version không tương thích');
+        return false;
+      }
+
+      // Validate data
+      if (gameData['listCharNew'] == null || gameData['point'] == null) {
+        print('⚠️ Dữ liệu QR không hợp lệ');
+        return false;
+      }
+
+      // Clear current game
+      point.clear();
+      listOfMaps.clear();
+      calPoint.clear();
+      listCharNew.clear();
+      setMoneyPoints.clear();
+
+      // Import data
+      listCharNew = List<String>.from(gameData['listCharNew']);
+      
+      // Rebuild listOfMaps
+      List<dynamic> importedMaps = gameData['listOfMaps'];
+      for (var mapData in importedMaps) {
+        listOfMaps.add({
+          'id': mapData['id'],
+          'cai': mapData['cai'],
+          'point': mapData['point'] ?? '',
+          'nowPoint': List<int>.from(mapData['nowPoint'] ?? []),
+        });
+      }
+
+      // Import points
+      List<dynamic> importedPoints = gameData['point'];
+      for (var roundPoints in importedPoints) {
+        point.add(List<int>.from(roundPoints));
+      }
+
+      // Import settings
+      fOrc = gameData['fOrc'] ?? 0;
+      dOrv = gameData['dOrv'] ?? 0;
+      limitValue = gameData['limitValue'] ?? 0;
+      showTotalScore = gameData['showTotalScore'] ?? false;
+      inputMode = gameData['inputMode'] ?? 1;
+
+      // Import setMoneyPoints
+      if (gameData['setMoneyPoints'] != null) {
+        Map<String, dynamic> moneyPoints = gameData['setMoneyPoints'];
+        setMoneyPoints = moneyPoints.map((key, value) => MapEntry(int.parse(key), value.toString()));
+      }
+
+      // Rebuild calPoint
+      for (int i = 0; i < listOfMaps.length; i++) {
+        calPoint.add({
+          'id': listOfMaps[i]['id'],
+          'win': false,
+          'def': false,
+          'x2': false,
+          'all': false,
+          'hue': false,
+        });
+      }
+
+      print('📥 Import game từ QR thành công!');
+      print('   Người chơi: ${listCharNew.length}');
+      print('   Số ván đã chơi: ${point.length}');
+
+      // Save to current session
+      await createNewGameSession();
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('❌ Lỗi khi import game từ QR: $e');
+      return false;
+    }
   }
 
   void saveListCharNew() async {

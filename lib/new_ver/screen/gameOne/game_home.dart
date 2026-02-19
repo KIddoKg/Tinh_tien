@@ -3,6 +3,7 @@ import 'package:Xi_Zach/new_ver/screen/gameOne/set_point_own_widget.dart';
 import 'package:Xi_Zach/new_ver/screen/gameOne/set_point_wave_widget.dart';
 import 'package:Xi_Zach/new_ver/screen/gameOne/game_settings_dialog.dart';
 import 'package:Xi_Zach/new_ver/screen/gameOne/game_guide_dialog.dart';
+import 'package:Xi_Zach/new_ver/screen/gameOne/share_game_qr_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -158,6 +159,20 @@ class _HomeZiZachState extends State<HomeZiZach> {
                     backgroundColor: AppColors.backgroundColor,
                     child: IconButton(
                       icon: Icon(
+                        Icons.qr_code_2,
+                        color: AppColors.primary,
+                      ),
+                      tooltip: 'Chia sẻ QR code',
+                      onPressed: () {
+                        showShareGameQRDialog(context);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  CircleAvatar(
+                    backgroundColor: AppColors.backgroundColor,
+                    child: IconButton(
+                      icon: Icon(
                         Icons.help_outline,
                         color: AppColors.primary,
                       ),
@@ -183,29 +198,6 @@ class _HomeZiZachState extends State<HomeZiZach> {
                       onPressed: () {
                         Provider.of<ZiZackController>(context, listen: false)
                             .toggleInputMode();
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  CircleAvatar(
-                    backgroundColor: AppColors.backgroundColor,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.emoji_events,
-                        color: AppColors.primary,
-                      ),
-                      tooltip: 'Kết thúc game',
-                      onPressed: () {
-                        if (result.point.isEmpty) {
-                          showCustomAlert(
-                            context,
-                            type: AlertType.warning,
-                            title: 'Thông báo',
-                            message: 'Chưa có ván nào để kết thúc!',
-                          );
-                        } else {
-                          showEndGameDialog(context);
-                        }
                       },
                     ),
                   ),
@@ -480,6 +472,43 @@ class _HomeZiZachState extends State<HomeZiZach> {
                                     ),
                                   ),
                                 ),
+                                Container(
+                                  width: 2,
+                                  color: AppColors.thirdColor,
+                                ),
+                                Expanded(
+                                  child: InkWellCir(
+                                    onTap: () {
+                                      if (result.point.isEmpty) {
+                                        showCustomAlert(
+                                          context,
+                                          type: AlertType.warning,
+                                          title: 'Thông báo',
+                                          message:
+                                              'Chưa có ván nào để kết thúc!',
+                                        );
+                                      } else {
+                                        showEndGameDialog(context);
+                                      }
+                                    },
+                                    child: Center(
+                                      child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.emoji_events_outlined),
+                                            Text(
+                                              'Kết thúc',
+                                              style: TextStyle(
+                                                  color:
+                                                      AppColors.primaryColor),
+                                            ),
+                                          ]),
+                                    ),
+                                  ),
+                                ),
                               ],
                             )
                           : Row(
@@ -506,6 +535,49 @@ class _HomeZiZachState extends State<HomeZiZach> {
                                                       AppColors.primaryColor),
                                             ),
                                           ]),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: 2,
+                                  color: AppColors.thirdColor,
+                                ),
+                                Expanded(
+                                  child: InkWellCir(
+
+                                    onTap: () {
+                                      if (result.point.isEmpty) {
+                                        showCustomAlert(
+                                          context,
+                                          type: AlertType.warning,
+                                          title: 'Thông báo',
+                                          message:
+                                              'Chưa có ván nào để kết thúc!',
+                                        );
+                                      } else {
+                                        showEndGameDialog(context);
+                                      }
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      child: Center(
+                                        child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.emoji_events_outlined),
+                                              Text(
+                                                'Kết thúc',
+                                                style: TextStyle(
+                                                    color:
+                                                        AppColors.primaryColor),
+                                              ),
+                                            ]),
+                                      ),
                                     ),
                                   ),
                                 ),

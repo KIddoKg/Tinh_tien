@@ -326,15 +326,11 @@ Future<void> showPopupSetAdd(BuildContext context) {
                                       Provider.of<ZiZackController>(context,
                                           listen: false);
 
-                                  // Set checkbox "all" (x2 đền) cho tất cả người chơi không phải cái
-                                  controller.setCheckAllCaiX2(
-                                      result.listOfMaps.length, true);
-
-                                  // Đóng popup
+                                  // Đóng popup trước
                                   Navigator.pop(context);
 
-                                  // Tính điểm và kết thúc ván
-                                  controller.calculateEndForMaps();
+                                  // Gọi hàm riêng cho Cái x2 toàn sàn
+                                  controller.calculateCaiX2ToanSan();
 
                                   // Kiểm tra xem có đạt điều kiện kết thúc không
                                   if (controller.checkGameEndCondition()) {
@@ -418,8 +414,7 @@ Future<void> showPopupSetAdd(BuildContext context) {
                 );
               });
             });
-          })).whenComplete(() =>
-      Provider.of<ZiZackController>(context, listen: false).checlNewRound());
+          }));
 }
 
 Widget generateColumn(Color color, List<String> labels, int col) {

@@ -78,6 +78,10 @@ dev_dependencies:
   pull_to_refresh: ^2.0.0
 
   package_info_plus: ^3.0.0
+  
+  # QR Code packages
+  qr_flutter: ^4.1.0  # Tạo QR code
+  mobile_scanner: ^5.0.0  # Scan QR code
 
 
 # For information on the generic Dart part of this file, see the

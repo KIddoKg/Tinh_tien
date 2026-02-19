@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../viewModel/zizach_Controller.dart';
 import '../../model/game_model.dart';
 import 'game_history_screen.dart';
+import 'scan_game_qr_screen.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class ZiZachScreen extends StatefulWidget {
@@ -227,148 +228,29 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
             ),
           ],
         ),
-        // actions: Row(
-        //   children: [
-        //     CircleAvatar(
-        //       backgroundColor: AppColors.backgroundColor,
-        //       child: IconButton(
-        //         icon: Icon(
-        //           Icons.add_circle,
-        //           color: Colors.green,
-        //         ),
-        //         tooltip: 'Tạo dữ liệu test',
-        //         onPressed: () async {
-        //           await _generateTestData();
-        //           showCustomAlert(
-        //             context,
-        //             type: AlertType.success,
-        //             title: 'Thành công',
-        //             message: 'Đã tạo 25 game sessions test!',
-        //           );
-        //         },
-        //       ),
-        //     ),
-        //     const SizedBox(width: 10),
-        //     CircleAvatar(
-        //       backgroundColor: AppColors.backgroundColor,
-        //       child: IconButton(
-        //         icon: Icon(
-        //           Icons.delete_forever,
-        //           color: Colors.red,
-        //         ),
-        //         tooltip: 'Xóa tất cả dữ liệu',
-        //         onPressed: () async {
-        //           // Hiển thị dialog xác nhận
-        //           bool? confirmed = await showDialog<bool>(
-        //             context: context,
-        //             builder: (context) => AlertDialog(
-        //               shape: RoundedRectangleBorder(
-        //                 borderRadius: BorderRadius.circular(16),
-        //               ),
-        //               title: Row(
-        //                 children: [
-        //                   Icon(Icons.warning, color: Colors.red),
-        //                   SizedBox(width: 8),
-        //                   Text('Xác nhận'),
-        //                 ],
-        //               ),
-        //               content:
-        //                   Text('Bạn có chắc muốn xóa TẤT CẢ dữ liệu game?'),
-        //               actions: [
-        //                 TextButton(
-        //                   onPressed: () => Navigator.pop(context, false),
-        //                   child: Text('Hủy'),
-        //                 ),
-        //                 ElevatedButton(
-        //                   style: ElevatedButton.styleFrom(
-        //                     backgroundColor: Colors.red,
-        //                   ),
-        //                   onPressed: () => Navigator.pop(context, true),
-        //                   child: Text('Xóa tất cả',
-        //                       style: TextStyle(color: Colors.white)),
-        //                 ),
-        //               ],
-        //             ),
-        //           );
-        //
-        //           if (confirmed == true) {
-        //             await _clearAllData();
-        //             showCustomAlert(
-        //               context,
-        //               type: AlertType.success,
-        //               title: 'Thành công',
-        //               message: 'Đã xóa tất cả dữ liệu!',
-        //             );
-        //           }
-        //         },
-        //       ),
-        //     ),
-        //     const SizedBox(width: 10),
-        //     CircleAvatar(
-        //       backgroundColor: AppColors.backgroundColor,
-        //       child: IconButton(
-        //         icon: Icon(
-        //           Icons.bug_report,
-        //           color: AppColors.primary,
-        //         ),
-        //         tooltip: 'Debug - Xem dữ liệu',
-        //         onPressed: () async {
-        //           print(
-        //               '\n🔍 DEBUG: Checking game history from ZiZach Screen...\n');
-        //           final controller =
-        //               Provider.of<ZiZackController>(context, listen: false);
-        //           await controller.printGameHistory();
-        //           controller.printCurrentSession();
-        //
-        //           // Refresh để load lại data
-        //           await controller.refreshGameHistory();
-        //
-        //           showCustomAlert(
-        //             context,
-        //             type: AlertType.success,
-        //             title: 'Debug',
-        //             message:
-        //                 'Đã in gameHistory ra console!\nKiểm tra debug console để xem chi tiết.',
-        //           );
-        //         },
-        //       ),
-        //     ),
-        //     const SizedBox(width: 10),
-        //     CircleAvatar(
-        //       backgroundColor: AppColors.backgroundColor,
-        //       child: IconButton(
-        //         icon: Icon(
-        //           Icons.science,
-        //           color: Colors.purple,
-        //         ),
-        //         tooltip: 'Test Scroll Screen',
-        //         onPressed: () {
-        //           Navigator.pushNamed(context, AppRoute.testScroll);
-        //         },
-        //       ),
-        //     ),
-        //     const SizedBox(width: 10),
-        //     CircleAvatar(
-        //       backgroundColor: AppColors.backgroundColor,
-        //       child: IconButton(
-        //         icon: Icon(
-        //           Icons.history,
-        //           color: AppColors.primary,
-        //         ),
-        //         tooltip: 'Lịch sử trò chơi',
-        //         onPressed: () {
-        //           Navigator.push(
-        //             context,
-        //             MaterialPageRoute(
-        //               builder: (context) => GameHistoryScreen(),
-        //             ),
-        //           );
-        //         },
-        //       ),
-        //     ),
-        //     const SizedBox(width: 10),
-        //   ],
-        // ),
+        actions: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: AppColors.backgroundColor,
+              child: IconButton(
+                icon: Icon(
+                  Icons.qr_code_scanner,
+                  color: AppColors.primary,
+                ),
+                tooltip: 'Quét QR để tham gia game',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ScanGameQRScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
+        ),
       ),
       body: Column(
         children: [

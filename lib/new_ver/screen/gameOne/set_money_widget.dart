@@ -28,7 +28,7 @@ Future<BuildContext?> showPopupSetPoint(BuildContext context) {
                     color:
                         Colors.white, // Đổi từ decoration sang color đơn giản
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0 , right: 16),
+                      padding: const EdgeInsets.only(left: 16.0, right: 16),
                       child: Column(
                         children: [
                           Padding(
@@ -153,7 +153,7 @@ Widget numericInputButton(String value) {
         InkWell(
           onTap: () {
             Provider.of<ZiZackController>(context, listen: false)
-                .appendToOutput(result.selectedIndex, value);
+                .appendToSetMoney(result.selectedIndex, value);
           },
           splashColor: Colors.blue,
           child: Container(
@@ -205,7 +205,7 @@ Widget backButton() {
         InkWell(
           onTap: () {
             Provider.of<ZiZackController>(context, listen: false)
-                .appendDel(result.selectedIndex);
+                .deleteLastSetMoney(result.selectedIndex);
           },
           child: Container(
             height: 60,
@@ -301,13 +301,12 @@ Future<BuildContext?> showNumberKeyboard(BuildContext context,
                             controller.selectedIndex <
                                     controller.listOfMaps.length
                                 ? (controller
-                                            .listOfMaps[controller
-                                                .selectedIndex]['point']
-                                            ?.isEmpty ??
-                                        true
+                                        .getSetMoneyPoint(
+                                            controller.selectedIndex)
+                                        .isEmpty
                                     ? '0'
-                                    : controller.listOfMaps[
-                                        controller.selectedIndex]['point'])
+                                    : controller.getSetMoneyPoint(
+                                        controller.selectedIndex))
                                 : '0',
                             style: TextStyle(
                               fontSize: 28,
@@ -330,17 +329,17 @@ Future<BuildContext?> showNumberKeyboard(BuildContext context,
                             child: Row(
                               children: [
                                 _buildNumberKey('1', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                                 const SizedBox(width: 12),
                                 _buildNumberKey('2', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                                 const SizedBox(width: 12),
                                 _buildNumberKey('3', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                               ],
@@ -353,17 +352,17 @@ Future<BuildContext?> showNumberKeyboard(BuildContext context,
                             child: Row(
                               children: [
                                 _buildNumberKey('4', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                                 const SizedBox(width: 12),
                                 _buildNumberKey('5', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                                 const SizedBox(width: 12),
                                 _buildNumberKey('6', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                               ],
@@ -376,17 +375,17 @@ Future<BuildContext?> showNumberKeyboard(BuildContext context,
                             child: Row(
                               children: [
                                 _buildNumberKey('7', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                                 const SizedBox(width: 12),
                                 _buildNumberKey('8', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                                 const SizedBox(width: 12),
                                 _buildNumberKey('9', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                               ],
@@ -404,13 +403,13 @@ Future<BuildContext?> showNumberKeyboard(BuildContext context,
                                   setState,
                                   () {
                                     // Toggle dấu +/- sử dụng method từ controller
-                                    controller
-                                        .toggleSign(controller.selectedIndex);
+                                    controller.toggleSetMoneySign(
+                                        controller.selectedIndex);
                                   },
                                 ),
                                 const SizedBox(width: 12),
                                 _buildNumberKey('0', setState, (value) {
-                                  controller.appendToOutput(
+                                  controller.appendToSetMoney(
                                       controller.selectedIndex, value);
                                 }),
                                 const SizedBox(width: 12),
@@ -419,8 +418,8 @@ Future<BuildContext?> showNumberKeyboard(BuildContext context,
                                   Colors.red,
                                   setState,
                                   () {
-                                    controller
-                                        .appendDel(controller.selectedIndex);
+                                    controller.deleteLastSetMoney(
+                                        controller.selectedIndex);
                                   },
                                 ),
                               ],
@@ -564,7 +563,7 @@ Widget _buildPlayerCardSetMoney(BuildContext context,
 
   final String name = result.listCharNew[index];
   final bool isCai = result.listOfMaps[index]['cai'] == true;
-  final String currentPoint = result.listOfMaps[index]['point'] ?? '0';
+  final String currentPoint = result.getSetMoneyPoint(index);
 
   return InkWell(
     onTap: () {

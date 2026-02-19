@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:provider/provider.dart';
 import '../../../share/app_styles.dart';
 import '../../../share/share_widget.dart';
@@ -13,62 +13,84 @@ class ScanGameQRScreen extends StatefulWidget {
 }
 
 class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
-  MobileScannerController cameraController = MobileScannerController();
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  QRViewController? controller;
   bool isProcessing = false;
+  bool flashOn = false;
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    if (controller != null) {
+      controller!.pauseCamera();
+      controller!.resumeCamera();
+    }
+  }
 
   @override
   void dispose() {
-    cameraController.dispose();
+    controller?.dispose();
     super.dispose();
   }
 
-  void _onDetect(BarcodeCapture capture) async {
-    if (isProcessing) return;
-
-    final List<Barcode> barcodes = capture.barcodes;
-    if (barcodes.isEmpty) return;
-
-    final String? code = barcodes.first.rawValue;
-    if (code == null || code.isEmpty) return;
-
+  void _onQRViewCreated(QRViewController qrController) {
     setState(() {
-      isProcessing = true;
+      controller = qrController;
     });
 
-    // Stop camera
-    await cameraController.stop();
+    controller!.scannedDataStream.listen((scanData) async {
+      if (isProcessing) return;
+      
+      final String? code = scanData.code;
+      if (code == null || code.isEmpty) return;
 
-    // Import game
-    final controller = Provider.of<ZiZackController>(context, listen: false);
-    bool success = await controller.importGameFromQR(code);
+      setState(() {
+        isProcessing = true;
+      });
 
-    if (!mounted) return;
+      // Pause camera
+      await controller!.pauseCamera();
 
-    if (success) {
-      showCustomAlert(
-        context,
-        type: AlertType.success,
-        title: 'Thành công',
-        message: 'Đã load ván chơi từ QR code!\nBạn có thể tiếp tục chơi ngay.',
-        onConfirm: () {
-          // Quay về màn hình game
-          Navigator.pop(context); // Đóng alert
-          Navigator.pop(context, true); // Đóng scan screen và trả về true
-        },
-      );
-    } else {
-      showCustomAlert(
-        context,
-        type: AlertType.error,
-        title: 'Lỗi',
-        message: 'Mã QR không hợp lệ hoặc đã hết hạn.\nVui lòng thử lại!',
-        onConfirm: () {
-          setState(() {
-            isProcessing = false;
-          });
-          cameraController.start();
-        },
-      );
+      // Import game
+      final gameController = Provider.of<ZiZackController>(context, listen: false);
+      bool success = await gameController.importGameFromQR(code);
+
+      if (!mounted) return;
+
+      if (success) {
+        showCustomAlert(
+          context,
+          type: AlertType.success,
+          title: 'Thành công',
+          message: 'Đã load ván chơi từ QR code!\nBạn có thể tiếp tục chơi ngay.',
+          onConfirm: () {
+            Navigator.pop(context); // Đóng alert
+            Navigator.pop(context, true); // Đóng scan screen
+          },
+        );
+      } else {
+        showCustomAlert(
+          context,
+          type: AlertType.error,
+          title: 'Lỗi',
+          message: 'Mã QR không hợp lệ hoặc đã hết hạn.\nVui lòng thử lại!',
+          onConfirm: () {
+            setState(() {
+              isProcessing = false;
+            });
+            controller?.resumeCamera();
+          },
+        );
+      }
+    });
+  }
+
+  void _toggleFlash() async {
+    if (controller != null) {
+      await controller!.toggleFlash();
+      setState(() {
+        flashOn = !flashOn;
+      });
     }
   }
 
@@ -85,134 +107,49 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.flash_on),
-            onPressed: () => cameraController.toggleTorch(),
+            icon: Icon(flashOn ? Icons.flash_on : Icons.flash_off),
+            onPressed: _toggleFlash,
+            tooltip: 'Bật/tắt đèn',
           ),
           IconButton(
             icon: Icon(Icons.cameraswitch),
-            onPressed: () => cameraController.switchCamera(),
+            onPressed: () => controller?.flipCamera(),
+            tooltip: 'Đổi camera',
           ),
         ],
       ),
       body: Stack(
         children: [
           // Camera view
-          MobileScanner(
-            controller: cameraController,
-            onDetect: _onDetect,
-          ),
-
-          // Overlay with instructions
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.7),
-                  Colors.transparent,
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.7),
-                ],
-                stops: [0.0, 0.3, 0.7, 1.0],
-              ),
-            ),
-          ),
-
-          // Scan frame
-          Center(
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: AppColors.primaryColor,
-                  width: 3,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-
-          // Corners decoration
-          Center(
-            child: SizedBox(
-              width: 300,
-              height: 300,
-              child: Stack(
-                children: [
-                  // Top-left corner
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: AppColors.primaryColor, width: 6),
-                          left: BorderSide(color: AppColors.primaryColor, width: 6),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Top-right corner
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: AppColors.primaryColor, width: 6),
-                          right: BorderSide(color: AppColors.primaryColor, width: 6),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Bottom-left corner
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: AppColors.primaryColor, width: 6),
-                          left: BorderSide(color: AppColors.primaryColor, width: 6),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Bottom-right corner
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: AppColors.primaryColor, width: 6),
-                          right: BorderSide(color: AppColors.primaryColor, width: 6),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          QRView(
+            key: qrKey,
+            onQRViewCreated: _onQRViewCreated,
+            overlay: QrScannerOverlayShape(
+              borderColor: AppColors.primaryColor,
+              borderRadius: 20,
+              borderLength: 40,
+              borderWidth: 6,
+              cutOutSize: 300,
             ),
           ),
 
           // Instructions
           Positioned(
-            top: 100,
+            top: 60,
             left: 0,
             right: 0,
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.7),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
               child: Column(
                 children: [
                   Icon(
@@ -249,8 +186,29 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen> {
             Container(
               color: Colors.black54,
               child: Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primaryColor,
+                child: Container(
+                  padding: EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Đang xử lý...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

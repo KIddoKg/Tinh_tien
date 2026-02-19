@@ -81,7 +81,7 @@ dev_dependencies:
   
   # QR Code packages
   qr_flutter: ^4.1.0  # Tạo QR code
-  mobile_scanner: ^5.0.0  # Scan QR code
+  qr_code_scanner_plus: ^2.1.1  # Scan QR code (hỗ trợ web)
 
 
 # For information on the generic Dart part of this file, see the

@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io' show Platform;
 
 import '../../viewModel/zizach_Controller.dart';
 import '../../model/game_model.dart';
@@ -230,6 +231,8 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
         ),
         actions: Row(
           children: [
+            // Hiển thị nút Scan QR trên tất cả platforms
+            // qr_code_scanner_plus hỗ trợ cả web, mobile
             CircleAvatar(
               backgroundColor: AppColors.backgroundColor,
               child: IconButton(
@@ -242,7 +245,7 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ScanGameQRScreen(),
+                      builder: (context) => const ScanGameQRScreen(),
                     ),
                   );
                 },
@@ -1744,6 +1747,134 @@ class _ZiZachScreenState extends State<ZiZachScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Dialog nhập QR code bằng text (cho web không có HTTPS)
+  void _showInputQRDialog(BuildContext context) {
+    final TextEditingController qrController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.qr_code_2, color: AppColors.primaryColor),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Nhập mã QR',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Dán mã QR từ người chia sẻ vào đây:',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+            SizedBox(height: 12),
+            TextField(
+              controller: qrController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Dán mã QR tại đây...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+                ),
+              ),
+            ),
+            SizedBox(height: 8),
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                  SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Chú ý: Camera cần HTTPS để hoạt động trên web',
+                      style: TextStyle(fontSize: 11, color: Colors.blue[700]),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              qrController.dispose();
+              Navigator.pop(dialogContext);
+            },
+            child: Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              String qrData = qrController.text.trim();
+              
+              if (qrData.isEmpty) {
+                showCustomAlert(
+                  dialogContext,
+                  type: AlertType.warning,
+                  title: 'Cảnh báo',
+                  message: 'Vui lòng nhập mã QR!',
+                );
+                return;
+              }
+
+              // Import game từ QR data
+              final controller = Provider.of<ZiZackController>(context, listen: false);
+              bool success = await controller.importGameFromQR(qrData);
+
+              qrController.dispose();
+              Navigator.pop(dialogContext); // Đóng dialog
+
+              if (success) {
+                showCustomAlert(
+                  context,
+                  type: AlertType.success,
+                  title: 'Thành công',
+                  message: 'Đã tải game thành công! Bấm "Bắt đầu thôi" để chơi.',
+                );
+              } else {
+                showCustomAlert(
+                  context,
+                  type: AlertType.error,
+                  title: 'Lỗi',
+                  message: 'Mã QR không hợp lệ hoặc đã hết hạn!',
+                );
+              }
+            },
+            child: Text(
+              'Tải game',
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ],

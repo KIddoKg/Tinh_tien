@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 extension DoubleNumberExtension on double {
@@ -127,4 +128,49 @@ extension StringColor on String {
   }
 }
 
+/// TextInputFormatter cho phép nhập số có dấu +/-
+/// Có thể nhấn +/- TRƯỚC hoặc SAU khi nhập số
+class SignedNumberInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Cho phép rỗng
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    // Chỉ cho phép: số, dấu +, dấu -
+    final regex = RegExp(r'^[+-]?\d*$');
+    
+    if (regex.hasMatch(newValue.text)) {
+      // Đảm bảo dấu +/- chỉ ở đầu
+      String text = newValue.text;
+      
+      // Nếu có dấu ở giữa hoặc cuối → di chuyển về đầu
+      if (text.length > 1) {
+        int signIndex = text.lastIndexOf('+');
+        if (signIndex == -1) signIndex = text.lastIndexOf('-');
+        
+        if (signIndex > 0) {
+          // Có dấu ở giữa/cuối → di chuyển về đầu
+          String sign = text[signIndex];
+          String digits = text.substring(0, signIndex) + text.substring(signIndex + 1);
+          text = sign + digits;
+          
+          return TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          );
+        }
+      }
+      
+      return newValue;
+    }
+
+    // Không hợp lệ → giữ giá trị cũ
+    return oldValue;
+  }
+}
 

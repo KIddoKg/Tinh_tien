@@ -473,9 +473,12 @@ Future<void> _showNumberKeyboard(
                           ),
                         ),
                         Text(
-                          tempPoints[playerIndex]?.isEmpty ?? true
-                              ? '0'
-                              : tempPoints[playerIndex] ?? '0',
+                          () {
+                            String value = tempPoints[playerIndex] ?? '';
+                            if (value.isEmpty) return '0';
+                            if (value == '-') return '-'; // ✨ Hiển thị dấu '-' khi chỉ có dấu
+                            return value;
+                          }(),
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -650,14 +653,51 @@ Widget _buildNumberKey(String number, StateSetter setState, int playerIndex,
 
 void _appendToTemp(int index, String value, Map<int, String> tempPoints) {
   String current = tempPoints[index] ?? '';
-  if (current == '0' || current == '-0') current = '';
+  
+  // ✨ Nếu current là '-' (chỉ có dấu), giữ dấu và thêm số
+  if (current == '-') {
+    tempPoints[index] = '-$value';
+    return;
+  }
+  
+  // Nếu current là '0' hoặc '-0', thay thế bằng số mới
+  if (current == '0' || current == '-0') {
+    // Nếu là '-0', giữ dấu trừ
+    if (current == '-0') {
+      tempPoints[index] = '-$value';
+    } else {
+      tempPoints[index] = value;
+    }
+    return;
+  }
+  
+  // Thêm số vào cuối
   tempPoints[index] = current + value;
 }
 
 void _toggleSignTemp(int index, Map<int, String> tempPoints) {
   String current = tempPoints[index] ?? '';
-  if (current.isEmpty || current == '0' || current == '-0') return;
+  
+  // ✨ Cho phép nhấn +/- ngay cả khi chưa có số
+  if (current.isEmpty || current == '0') {
+    // Nếu chưa có gì hoặc là '0', đặt thành '-' để sẵn sàng nhập số âm
+    tempPoints[index] = '-';
+    return;
+  }
+  
+  if (current == '-') {
+    // Nếu chỉ có dấu '-', xóa nó (quay về dương)
+    tempPoints[index] = '';
+    return;
+  }
+  
+  if (current == '-0') {
+    // Nếu là '-0', chuyển về ''
+    tempPoints[index] = '';
+    return;
+  }
 
+  // Toggle dấu khi đã có số
   if (current.startsWith('-')) {
     tempPoints[index] = current.substring(1);
   } else {

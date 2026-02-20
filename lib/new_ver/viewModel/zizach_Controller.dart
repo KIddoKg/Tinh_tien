@@ -399,6 +399,25 @@ class ZiZackController extends ChangeNotifier {
 
   void appendToSetMoney(int index, String value) {
     String current = setMoneyPoints[index] ?? '';
+    
+    // ✨ Nếu current là '-' (chỉ có dấu), giữ dấu và thêm số
+    if (current == '-') {
+      setMoneyPoints[index] = '-$value';
+      notifyListeners();
+      return;
+    }
+    
+    // Nếu current là '0' hoặc '-0', thay thế bằng số mới
+    if (current == '0' || current == '-0') {
+      if (current == '-0') {
+        setMoneyPoints[index] = '-$value';
+      } else {
+        setMoneyPoints[index] = value;
+      }
+      notifyListeners();
+      return;
+    }
+    
     setMoneyPoints[index] = current + value;
     notifyListeners();
   }
@@ -413,14 +432,36 @@ class ZiZackController extends ChangeNotifier {
 
   void toggleSetMoneySign(int index) {
     String current = setMoneyPoints[index] ?? '';
-    if (current.isNotEmpty && current != '0') {
-      if (current.startsWith('-')) {
-        setMoneyPoints[index] = current.substring(1);
-      } else {
-        setMoneyPoints[index] = '-' + current;
-      }
+    
+    // ✨ Cho phép nhấn +/- ngay cả khi chưa có số
+    if (current.isEmpty || current == '0') {
+      // Nếu chưa có gì hoặc là '0', đặt thành '-'
+      setMoneyPoints[index] = '-';
       notifyListeners();
+      return;
     }
+    
+    if (current == '-') {
+      // Nếu chỉ có dấu '-', xóa nó (quay về dương)
+      setMoneyPoints[index] = '';
+      notifyListeners();
+      return;
+    }
+    
+    if (current == '-0') {
+      // Nếu là '-0', chuyển về ''
+      setMoneyPoints[index] = '';
+      notifyListeners();
+      return;
+    }
+    
+    // Toggle dấu khi đã có số
+    if (current.startsWith('-')) {
+      setMoneyPoints[index] = current.substring(1);
+    } else {
+      setMoneyPoints[index] = '-' + current;
+    }
+    notifyListeners();
   }
 
   void clearSetMoneyPoints() {
@@ -793,66 +834,71 @@ class ZiZackController extends ChangeNotifier {
       'fOrc': fOrc,
       'dOrv': dOrv,
       'limitValue': limitValue,
+      'setMoneyPoints': setMoneyPoints.map((key, value) =>
+          MapEntry(key.toString(), value)), // 💰 Convert key to String for JSON
       // Bỏ các field không cần thiết để giảm size
       // 'showTotalScore': showTotalScore,
       // 'inputMode': inputMode,
-      // 'setMoneyPoints': setMoneyPoints,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
 
     String jsonString = jsonEncode(gameData);
     print('📤 Export game to QR:');
     print('   Original JSON: ${jsonString.length} bytes');
-    
+
     // 🗜️ LUÔN NÉN dữ liệu bằng gzip để giảm tối đa size
     try {
       // Nén bằng GZip từ package:archive (work trên web + mobile)
       List<int> jsonBytes = utf8.encode(jsonString);
       List<int> compressed = GZipEncoder().encode(jsonBytes)!;
       String base64Compressed = base64Encode(compressed);
-      
+
       // Thêm prefix để biết là data đã nén
       String compressedData = 'GZIP:$base64Compressed';
-      
+
       print('   Compressed: ${compressedData.length} bytes');
-      print('   Compression ratio: ${(compressedData.length / jsonString.length * 100).toStringAsFixed(1)}%');
-      
+      print(
+          '   Compression ratio: ${(compressedData.length / jsonString.length * 100).toStringAsFixed(1)}%');
+
       // Kiểm tra xem sau khi nén còn quá lớn không
       if (compressedData.length > 10000) {
-        print('⚠️ QR code vẫn quá lớn sau khi nén (${compressedData.length} bytes)');
+        print(
+            '⚠️ QR code vẫn quá lớn sau khi nén (${compressedData.length} bytes)');
         print('   → Khuyến nghị dùng "Copy Link" thay vì scan QR');
       }
-      
+
       return compressedData;
     } catch (e) {
       print('❌ Không thể nén dữ liệu: $e');
       print('   → Sử dụng JSON gốc (có thể quá lớn cho QR)');
       return jsonString;
     }
-  }  /// Import game từ QR code JSON string
+  }
+
+  /// Import game từ QR code JSON string
   Future<bool> importGameFromQR(String qrData) async {
     try {
       print('📥 importGameFromQR - START');
       print('   Data length: ${qrData.length} characters');
 
       String jsonString;
-      
+
       // 🗜️ Kiểm tra xem data có được nén không
       if (qrData.startsWith('GZIP:')) {
         print('🔓 Detected compressed data, decompressing...');
         try {
           // Loại bỏ prefix "GZIP:"
           String base64Data = qrData.substring(5);
-          
+
           // Decode base64
           List<int> compressed = base64Decode(base64Data);
-          
+
           // Giải nén gzip bằng package:archive
           List<int> decompressed = GZipDecoder().decodeBytes(compressed);
-          
+
           // Convert bytes về string
           jsonString = utf8.decode(decompressed);
-          
+
           print('✅ Decompressed: ${jsonString.length} bytes');
         } catch (e) {
           print('❌ Failed to decompress: $e');
@@ -912,11 +958,14 @@ class ZiZackController extends ChangeNotifier {
       // Import points - xây lại từ nowPoint
       point.clear();
       if (importedMaps.isNotEmpty) {
-        int maxRounds = importedMaps.map((m) => (m['nowPoint'] as List).length).reduce((a, b) => a > b ? a : b);
+        int maxRounds = importedMaps
+            .map((m) => (m['nowPoint'] as List).length)
+            .reduce((a, b) => a > b ? a : b);
         for (int round = 0; round < maxRounds; round++) {
           point.add(List<int>.filled(importedMaps.length, 0));
           for (int player = 0; player < importedMaps.length; player++) {
-            List<int> nowPoint = List<int>.from(importedMaps[player]['nowPoint'] ?? []);
+            List<int> nowPoint =
+                List<int>.from(importedMaps[player]['nowPoint'] ?? []);
             if (round < nowPoint.length) {
               point[round][player] = nowPoint[round];
             }
@@ -925,14 +974,24 @@ class ZiZackController extends ChangeNotifier {
       }
       print('✅ Reconstructed ${point.length} rounds from nowPoint');
 
-      // Import settings (khôi phục từ dữ liệu hiện tại nếu không có trong QR)
+      // Import settings
       fOrc = gameData['fOrc'] ?? 0;
       dOrv = gameData['dOrv'] ?? 0;
       limitValue = gameData['limitValue'] ?? 0;
       showTotalScore = false; // ♻️ Reset về mặc định
       inputMode = 1; // ♻️ Reset về mặc định
-      setMoneyPoints.clear(); // ♻️ Reset về rỗng
-      print('✅ Imported settings (restored defaults for removed fields)');
+
+      // Import setMoneyPoints (điểm đã cài)
+      setMoneyPoints.clear();
+      if (gameData['setMoneyPoints'] != null) {
+        Map<String, dynamic> moneyPoints = gameData['setMoneyPoints'];
+        setMoneyPoints = moneyPoints
+            .map((key, value) => MapEntry(int.parse(key), value.toString()));
+        print('✅ Imported ${setMoneyPoints.length} setMoneyPoints');
+      } else {
+        print('ℹ️ No setMoneyPoints in QR data');
+      }
+      print('✅ Imported settings');
 
       // Rebuild calPoint
       for (int i = 0; i < listOfMaps.length; i++) {

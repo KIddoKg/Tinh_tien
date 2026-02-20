@@ -321,16 +321,15 @@ Future<BuildContext?> showNumberKeyboard(BuildContext context,
                             ),
                           ),
                           Text(
-                            controller.selectedIndex <
-                                    controller.listOfMaps.length
-                                ? (controller
-                                        .getSetMoneyPoint(
-                                            controller.selectedIndex)
-                                        .isEmpty
-                                    ? '0'
-                                    : controller.getSetMoneyPoint(
-                                        controller.selectedIndex))
-                                : '0',
+                            () {
+                              if (controller.selectedIndex < controller.listOfMaps.length) {
+                                String value = controller.getSetMoneyPoint(controller.selectedIndex);
+                                if (value.isEmpty) return '0';
+                                if (value == '-') return '-'; // ✨ Hiển thị dấu '-' khi chỉ có dấu
+                                return value;
+                              }
+                              return '0';
+                            }(),
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,

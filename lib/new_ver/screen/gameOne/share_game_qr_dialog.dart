@@ -101,36 +101,36 @@ Future<void> showShareGameQRDialog(BuildContext context) async {
                     ),
                   ),
                 ),
-                SizedBox(height: 24),
-
-                // Game info
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.sixColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      _buildInfoRow(Icons.people, 'Người chơi',
-                          '${controller.listCharNew.length} người'),
-                      SizedBox(height: 8),
-                      _buildInfoRow(Icons.confirmation_number, 'Số ván',
-                          '${controller.point.length} ván'),
-                      if (controller.fOrc == 1 &&
-                          controller.limitValue > 0) ...[
-                        SizedBox(height: 8),
-                        _buildInfoRow(
-                          Icons.flag,
-                          'Giới hạn',
-                          controller.dOrv == 0
-                              ? '${controller.limitValue} điểm'
-                              : '${controller.limitValue} ván',
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                // SizedBox(height: 24),
+                //
+                // // Game info
+                // Container(
+                //   padding: EdgeInsets.all(12),
+                //   decoration: BoxDecoration(
+                //     color: AppColors.sixColor.withOpacity(0.1),
+                //     borderRadius: BorderRadius.circular(12),
+                //   ),
+                //   child: Column(
+                //     children: [
+                //       _buildInfoRow(Icons.people, 'Người chơi',
+                //           '${controller.listCharNew.length} người'),
+                //       SizedBox(height: 8),
+                //       _buildInfoRow(Icons.confirmation_number, 'Số ván',
+                //           '${controller.point.length} ván'),
+                //       if (controller.fOrc == 1 &&
+                //           controller.limitValue > 0) ...[
+                //         SizedBox(height: 8),
+                //         _buildInfoRow(
+                //           Icons.flag,
+                //           'Giới hạn',
+                //           controller.dOrv == 0
+                //               ? '${controller.limitValue} điểm'
+                //               : '${controller.limitValue} ván',
+                //         ),
+                //       ],
+                //     ],
+                //   ),
+                // ),
                 SizedBox(height: 20),
 
                 // Copy Link button

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:archive/archive.dart'; // 🗜️ For cross-platform compression
 
 import '../../share/share_widget.dart';
 import '../model/game_model.dart';
@@ -778,46 +779,91 @@ class ZiZackController extends ChangeNotifier {
       'version': '1.0', // Version để tương thích sau này
       'listCharNew': listCharNew,
       'listOfMaps': listOfMaps.map((map) {
+        // 🎯 Chỉ export thông tin cần thiết
         return {
           'id': map['id'],
           'name': map['name'],
           'cai': map['cai'],
           'isOut': map['isOut'] ?? false, // 🚪 Export trạng thái out
-          'point': map['point'] ?? '',
+          // Bỏ 'point' và 'end' vì có thể tính lại từ 'nowPoint'
           'nowPoint': List<int>.from(map['nowPoint'] ?? []),
-          'end': map['end'] ?? 0,
         };
       }).toList(),
       'point': point,
       'fOrc': fOrc,
       'dOrv': dOrv,
       'limitValue': limitValue,
-      'showTotalScore': showTotalScore,
-      'inputMode': inputMode,
-      'setMoneyPoints':
-          setMoneyPoints.map((key, value) => MapEntry(key.toString(), value)),
+      // Bỏ các field không cần thiết để giảm size
+      // 'showTotalScore': showTotalScore,
+      // 'inputMode': inputMode,
+      // 'setMoneyPoints': setMoneyPoints,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
 
     String jsonString = jsonEncode(gameData);
-    print('📤 Export game to QR: ${jsonString.length} bytes');
-
-    // Warning nếu data quá lớn
-    if (jsonString.length > 2000) {
-      print('⚠️ QR code rất lớn (${jsonString.length} bytes)');
-      print('   → Khuyến nghị dùng "Copy Link" thay vì scan QR');
+    print('📤 Export game to QR:');
+    print('   Original JSON: ${jsonString.length} bytes');
+    
+    // 🗜️ LUÔN NÉN dữ liệu bằng gzip để giảm tối đa size
+    try {
+      // Nén bằng GZip từ package:archive (work trên web + mobile)
+      List<int> jsonBytes = utf8.encode(jsonString);
+      List<int> compressed = GZipEncoder().encode(jsonBytes)!;
+      String base64Compressed = base64Encode(compressed);
+      
+      // Thêm prefix để biết là data đã nén
+      String compressedData = 'GZIP:$base64Compressed';
+      
+      print('   Compressed: ${compressedData.length} bytes');
+      print('   Compression ratio: ${(compressedData.length / jsonString.length * 100).toStringAsFixed(1)}%');
+      
+      // Kiểm tra xem sau khi nén còn quá lớn không
+      if (compressedData.length > 10000) {
+        print('⚠️ QR code vẫn quá lớn sau khi nén (${compressedData.length} bytes)');
+        print('   → Khuyến nghị dùng "Copy Link" thay vì scan QR');
+      }
+      
+      return compressedData;
+    } catch (e) {
+      print('❌ Không thể nén dữ liệu: $e');
+      print('   → Sử dụng JSON gốc (có thể quá lớn cho QR)');
+      return jsonString;
     }
-
-    return jsonString;
-  }
-
-  /// Import game từ QR code JSON string
+  }  /// Import game từ QR code JSON string
   Future<bool> importGameFromQR(String qrData) async {
     try {
       print('📥 importGameFromQR - START');
       print('   Data length: ${qrData.length} characters');
 
-      Map<String, dynamic> gameData = jsonDecode(qrData);
+      String jsonString;
+      
+      // 🗜️ Kiểm tra xem data có được nén không
+      if (qrData.startsWith('GZIP:')) {
+        print('🔓 Detected compressed data, decompressing...');
+        try {
+          // Loại bỏ prefix "GZIP:"
+          String base64Data = qrData.substring(5);
+          
+          // Decode base64
+          List<int> compressed = base64Decode(base64Data);
+          
+          // Giải nén gzip bằng package:archive
+          List<int> decompressed = GZipDecoder().decodeBytes(compressed);
+          
+          // Convert bytes về string
+          jsonString = utf8.decode(decompressed);
+          
+          print('✅ Decompressed: ${jsonString.length} bytes');
+        } catch (e) {
+          print('❌ Failed to decompress: $e');
+          return false;
+        }
+      } else {
+        // Không nén, dùng trực tiếp
+        jsonString = qrData;
+      }
+
+      Map<String, dynamic> gameData = jsonDecode(jsonString);
       print('✅ JSON decode successful');
 
       // Validate version
@@ -827,11 +873,11 @@ class ZiZackController extends ChangeNotifier {
       }
       print('✅ Version OK: ${gameData['version']}');
 
-      // Validate data
-      if (gameData['listCharNew'] == null || gameData['point'] == null) {
+      // Validate data - chỉ cần listCharNew và listOfMaps
+      if (gameData['listCharNew'] == null || gameData['listOfMaps'] == null) {
         print('⚠️ Dữ liệu QR không hợp lệ');
         print('   listCharNew: ${gameData['listCharNew']}');
-        print('   point: ${gameData['point']}');
+        print('   listOfMaps: ${gameData['listOfMaps']}');
         return false;
       }
       print('✅ Data validation passed');
@@ -856,35 +902,37 @@ class ZiZackController extends ChangeNotifier {
           'name': mapData['name'] ?? '',
           'cai': mapData['cai'],
           'isOut': mapData['isOut'] ?? false, // 🚪 Import trạng thái out
-          'point': mapData['point'] ?? '',
+          'point': '', // ♻️ Khôi phục field đã xóa
           'nowPoint': List<int>.from(mapData['nowPoint'] ?? []),
-          'end': mapData['end'] ?? 0,
+          'end': 0, // ♻️ Khôi phục field đã xóa
         });
       }
       print('✅ Imported ${listOfMaps.length} player maps');
 
-      // Import points
-      List<dynamic> importedPoints = gameData['point'];
-      for (var roundPoints in importedPoints) {
-        point.add(List<int>.from(roundPoints));
+      // Import points - xây lại từ nowPoint
+      point.clear();
+      if (importedMaps.isNotEmpty) {
+        int maxRounds = importedMaps.map((m) => (m['nowPoint'] as List).length).reduce((a, b) => a > b ? a : b);
+        for (int round = 0; round < maxRounds; round++) {
+          point.add(List<int>.filled(importedMaps.length, 0));
+          for (int player = 0; player < importedMaps.length; player++) {
+            List<int> nowPoint = List<int>.from(importedMaps[player]['nowPoint'] ?? []);
+            if (round < nowPoint.length) {
+              point[round][player] = nowPoint[round];
+            }
+          }
+        }
       }
-      print('✅ Imported ${point.length} rounds');
+      print('✅ Reconstructed ${point.length} rounds from nowPoint');
 
-      // Import settings
+      // Import settings (khôi phục từ dữ liệu hiện tại nếu không có trong QR)
       fOrc = gameData['fOrc'] ?? 0;
       dOrv = gameData['dOrv'] ?? 0;
       limitValue = gameData['limitValue'] ?? 0;
-      showTotalScore = gameData['showTotalScore'] ?? false;
-      inputMode = gameData['inputMode'] ?? 1;
-      print('✅ Imported settings');
-
-      // Import setMoneyPoints
-      if (gameData['setMoneyPoints'] != null) {
-        Map<String, dynamic> moneyPoints = gameData['setMoneyPoints'];
-        setMoneyPoints = moneyPoints
-            .map((key, value) => MapEntry(int.parse(key), value.toString()));
-        print('✅ Imported setMoneyPoints');
-      }
+      showTotalScore = false; // ♻️ Reset về mặc định
+      inputMode = 1; // ♻️ Reset về mặc định
+      setMoneyPoints.clear(); // ♻️ Reset về rỗng
+      print('✅ Imported settings (restored defaults for removed fields)');
 
       // Rebuild calPoint
       for (int i = 0; i < listOfMaps.length; i++) {

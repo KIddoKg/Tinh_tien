@@ -171,7 +171,7 @@ class _HomeZiZachState extends State<HomeZiZach> {
                     backgroundColor: AppColors.backgroundColor,
                     child: IconButton(
                       icon: Icon(
-                        Icons.qr_code_2,
+                        Icons.share,
                         color: AppColors.primary,
                       ),
                       tooltip: 'Chia sẻ QR code',

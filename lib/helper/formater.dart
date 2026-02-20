@@ -40,7 +40,7 @@ extension DatetimeExtesion on DateTime {
     List<String>? formatWeeks,
   }) {
     var defaultWeek =
-    formatWeeks ??= ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        formatWeeks ??= ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
     return defaultWeek[weekday - 1];
   }
@@ -48,7 +48,7 @@ extension DatetimeExtesion on DateTime {
   static String weekdayStringFrom(
       {required DateTime date, List<String>? formatWeeks}) {
     var defaultWeek =
-    formatWeeks ??= ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        formatWeeks ??= ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
     return defaultWeek[date.weekday - 1];
   }
 }
@@ -143,29 +143,30 @@ class SignedNumberInputFormatter extends TextInputFormatter {
 
     // Chỉ cho phép: số, dấu +, dấu -
     final regex = RegExp(r'^[+-]?\d*$');
-    
+
     if (regex.hasMatch(newValue.text)) {
       // Đảm bảo dấu +/- chỉ ở đầu
       String text = newValue.text;
-      
+
       // Nếu có dấu ở giữa hoặc cuối → di chuyển về đầu
       if (text.length > 1) {
         int signIndex = text.lastIndexOf('+');
         if (signIndex == -1) signIndex = text.lastIndexOf('-');
-        
+
         if (signIndex > 0) {
           // Có dấu ở giữa/cuối → di chuyển về đầu
           String sign = text[signIndex];
-          String digits = text.substring(0, signIndex) + text.substring(signIndex + 1);
+          String digits =
+              text.substring(0, signIndex) + text.substring(signIndex + 1);
           text = sign + digits;
-          
+
           return TextEditingValue(
             text: text,
             selection: TextSelection.collapsed(offset: text.length),
           );
         }
       }
-      
+
       return newValue;
     }
 
@@ -173,4 +174,3 @@ class SignedNumberInputFormatter extends TextInputFormatter {
     return oldValue;
   }
 }
-

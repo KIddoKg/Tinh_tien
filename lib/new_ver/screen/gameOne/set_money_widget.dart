@@ -322,10 +322,13 @@ Future<BuildContext?> showNumberKeyboard(BuildContext context,
                           ),
                           Text(
                             () {
-                              if (controller.selectedIndex < controller.listOfMaps.length) {
-                                String value = controller.getSetMoneyPoint(controller.selectedIndex);
+                              if (controller.selectedIndex <
+                                  controller.listOfMaps.length) {
+                                String value = controller
+                                    .getSetMoneyPoint(controller.selectedIndex);
                                 if (value.isEmpty) return '0';
-                                if (value == '-') return '-'; // ✨ Hiển thị dấu '-' khi chỉ có dấu
+                                if (value == '-')
+                                  return '-'; // ✨ Hiển thị dấu '-' khi chỉ có dấu
                                 return value;
                               }
                               return '0';

@@ -303,7 +303,16 @@ class ZiZackController extends ChangeNotifier {
           ? '$playerName đã rời khỏi game'
           : '$playerName đã quay lại game';
 
-      // 🚪 Lưu trạng thái mới vào session
+      // � Nếu player bị loại ra (out = true) → Reset điểm cài về 0
+      if (!currentStatus == true) {
+        // !currentStatus = true nghĩa là đang chuyển thành out
+        if (setMoneyPoints.containsKey(index)) {
+          setMoneyPoints.remove(index);
+          print('💰 Reset điểm cài của $playerName về 0');
+        }
+      }
+
+      // �🚪 Lưu trạng thái mới vào session
       saveCurrentSession();
 
       showCustomAlert(
@@ -399,14 +408,14 @@ class ZiZackController extends ChangeNotifier {
 
   void appendToSetMoney(int index, String value) {
     String current = setMoneyPoints[index] ?? '';
-    
+
     // ✨ Nếu current là '-' (chỉ có dấu), giữ dấu và thêm số
     if (current == '-') {
       setMoneyPoints[index] = '-$value';
       notifyListeners();
       return;
     }
-    
+
     // Nếu current là '0' hoặc '-0', thay thế bằng số mới
     if (current == '0' || current == '-0') {
       if (current == '-0') {
@@ -417,7 +426,7 @@ class ZiZackController extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    
+
     setMoneyPoints[index] = current + value;
     notifyListeners();
   }
@@ -432,7 +441,7 @@ class ZiZackController extends ChangeNotifier {
 
   void toggleSetMoneySign(int index) {
     String current = setMoneyPoints[index] ?? '';
-    
+
     // ✨ Cho phép nhấn +/- ngay cả khi chưa có số
     if (current.isEmpty || current == '0') {
       // Nếu chưa có gì hoặc là '0', đặt thành '-'
@@ -440,21 +449,21 @@ class ZiZackController extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    
+
     if (current == '-') {
       // Nếu chỉ có dấu '-', xóa nó (quay về dương)
       setMoneyPoints[index] = '';
       notifyListeners();
       return;
     }
-    
+
     if (current == '-0') {
       // Nếu là '-0', chuyển về ''
       setMoneyPoints[index] = '';
       notifyListeners();
       return;
     }
-    
+
     // Toggle dấu khi đã có số
     if (current.startsWith('-')) {
       setMoneyPoints[index] = current.substring(1);
@@ -1089,6 +1098,8 @@ class ZiZackController extends ChangeNotifier {
         currentSession!.players[i].currentPoint = listOfMaps[i]['point'] ?? '';
         currentSession!.players[i].roundPoints =
             List<int>.from(listOfMaps[i]['nowPoint'] ?? []);
+        currentSession!.players[i].setMoneyPoint = 
+            setMoneyPoints[i] ?? ''; // 💰 Lưu điểm cài
       }
     }
 
@@ -1279,10 +1290,21 @@ class ZiZackController extends ChangeNotifier {
       // Reset selectedIndex
       selectedIndex = -1;
 
+      // 💰 Restore setMoneyPoints từ player data
+      setMoneyPoints.clear();
+      for (int i = 0; i < inProgressSession.players.length; i++) {
+        Player player = inProgressSession.players[i];
+        if (player.setMoneyPoint.isNotEmpty) {
+          setMoneyPoints[i] = player.setMoneyPoint;
+          print('   💰 Restored setMoneyPoint for ${player.name}: ${player.setMoneyPoint}');
+        }
+      }
+
       print('✅ Game data restored successfully:');
       print('   listCharNew: $listCharNew');
       print('   point (rounds): ${point.length} ván');
       print('   listOfMaps players: ${listOfMaps.length}');
+      print('   setMoneyPoints: $setMoneyPoints'); // 💰 Log điểm cài
       for (int i = 0; i < listOfMaps.length; i++) {
         print(
             '   Player ${i}: ${listOfMaps[i]['name']} - isCai: ${listOfMaps[i]['cai']} - point: "${listOfMaps[i]['point']}" - end: ${listOfMaps[i]['end']}');

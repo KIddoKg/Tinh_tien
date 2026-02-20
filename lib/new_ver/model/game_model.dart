@@ -9,6 +9,7 @@ class Player {
   String currentPoint; // Điểm đang nhập
   List<int> roundPoints; // Điểm của từng ván
   int totalScore; // Tổng điểm
+  String setMoneyPoint; // 💰 Điểm cài của player
 
   Player({
     required this.id,
@@ -18,6 +19,7 @@ class Player {
     this.currentPoint = '',
     List<int>? roundPoints,
     this.totalScore = 0,
+    this.setMoneyPoint = '', // 💰 Mặc định chưa cài điểm
   }) : roundPoints = roundPoints ?? [];
 
   // Convert Player to Map
@@ -30,6 +32,7 @@ class Player {
       'currentPoint': currentPoint,
       'roundPoints': roundPoints,
       'totalScore': totalScore,
+      'setMoneyPoint': setMoneyPoint, // 💰 Lưu điểm cài
     };
   }
 
@@ -43,6 +46,7 @@ class Player {
       currentPoint: map['currentPoint'] ?? '',
       roundPoints: List<int>.from(map['roundPoints'] ?? []),
       totalScore: map['totalScore'] ?? 0,
+      setMoneyPoint: map['setMoneyPoint'] ?? '', // 💰 Load điểm cài
     );
   }
 

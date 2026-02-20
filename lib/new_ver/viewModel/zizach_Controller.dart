@@ -93,6 +93,7 @@ class ZiZackController extends ChangeNotifier {
           id: oldPlayer.id,
           name: newName,
           isCai: oldPlayer.isCai,
+          isOut: oldPlayer.isOut, // 🚪 Giữ nguyên trạng thái out
           currentPoint: oldPlayer.currentPoint,
           roundPoints: oldPlayer.roundPoints,
           totalScore: oldPlayer.totalScore,
@@ -160,6 +161,7 @@ class ZiZackController extends ChangeNotifier {
       Player newPlayer = Player(
         id: newIndex,
         name: name,
+        isOut: false, // 🚪 Player mới chưa out
         roundPoints: roundPoints,
         totalScore: 0,
       );
@@ -235,7 +237,7 @@ class ZiZackController extends ChangeNotifier {
     calPoint = [];
     listOfMaps = [];
     setMoneyPoints.clear(); // 🔥 Clear điểm "Cài điểm" khi bắt đầu game mới
-    
+
     // Access the listCharNew
     List<String> yourList = await loadListCharNew();
     print("dđ${yourList}");
@@ -258,6 +260,7 @@ class ZiZackController extends ChangeNotifier {
         'point': point,
         'nowPoint': nowPoint,
         'end': end,
+        'isOut': false, // 🚪 Trạng thái player có out game không
       };
 
       Map<String, dynamic> currentMapPoint = {
@@ -286,6 +289,31 @@ class ZiZackController extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  // 🚪 Toggle player out/in game
+  void togglePlayerOut(int index, BuildContext context) {
+    if (index >= 0 && index < listOfMaps.length) {
+      bool currentStatus = listOfMaps[index]['isOut'] ?? false;
+      listOfMaps[index]['isOut'] = !currentStatus;
+
+      String playerName = listOfMaps[index]['name'];
+      String message = !currentStatus
+          ? '$playerName đã rời khỏi game'
+          : '$playerName đã quay lại game';
+
+      // 🚪 Lưu trạng thái mới vào session
+      saveCurrentSession();
+
+      showCustomAlert(
+        context,
+        type: AlertType.success,
+        title: 'Thông báo',
+        message: message,
+      );
+
+      notifyListeners();
+    }
   }
 
   setCai(BuildContext context) {
@@ -752,9 +780,12 @@ class ZiZackController extends ChangeNotifier {
       'listOfMaps': listOfMaps.map((map) {
         return {
           'id': map['id'],
+          'name': map['name'],
           'cai': map['cai'],
+          'isOut': map['isOut'] ?? false, // 🚪 Export trạng thái out
           'point': map['point'] ?? '',
           'nowPoint': List<int>.from(map['nowPoint'] ?? []),
+          'end': map['end'] ?? 0,
         };
       }).toList(),
       'point': point,
@@ -770,25 +801,40 @@ class ZiZackController extends ChangeNotifier {
 
     String jsonString = jsonEncode(gameData);
     print('📤 Export game to QR: ${jsonString.length} bytes');
+
+    // Warning nếu data quá lớn
+    if (jsonString.length > 2000) {
+      print('⚠️ QR code rất lớn (${jsonString.length} bytes)');
+      print('   → Khuyến nghị dùng "Copy Link" thay vì scan QR');
+    }
+
     return jsonString;
   }
 
   /// Import game từ QR code JSON string
   Future<bool> importGameFromQR(String qrData) async {
     try {
+      print('📥 importGameFromQR - START');
+      print('   Data length: ${qrData.length} characters');
+
       Map<String, dynamic> gameData = jsonDecode(qrData);
+      print('✅ JSON decode successful');
 
       // Validate version
       if (gameData['version'] != '1.0') {
-        print('⚠️ QR code version không tương thích');
+        print('⚠️ QR code version không tương thích: ${gameData['version']}');
         return false;
       }
+      print('✅ Version OK: ${gameData['version']}');
 
       // Validate data
       if (gameData['listCharNew'] == null || gameData['point'] == null) {
         print('⚠️ Dữ liệu QR không hợp lệ');
+        print('   listCharNew: ${gameData['listCharNew']}');
+        print('   point: ${gameData['point']}');
         return false;
       }
+      print('✅ Data validation passed');
 
       // Clear current game
       point.clear();
@@ -796,26 +842,33 @@ class ZiZackController extends ChangeNotifier {
       calPoint.clear();
       listCharNew.clear();
       setMoneyPoints.clear();
+      print('✅ Cleared current game data');
 
       // Import data
       listCharNew = List<String>.from(gameData['listCharNew']);
+      print('✅ Imported ${listCharNew.length} players');
 
       // Rebuild listOfMaps
       List<dynamic> importedMaps = gameData['listOfMaps'];
       for (var mapData in importedMaps) {
         listOfMaps.add({
           'id': mapData['id'],
+          'name': mapData['name'] ?? '',
           'cai': mapData['cai'],
+          'isOut': mapData['isOut'] ?? false, // 🚪 Import trạng thái out
           'point': mapData['point'] ?? '',
           'nowPoint': List<int>.from(mapData['nowPoint'] ?? []),
+          'end': mapData['end'] ?? 0,
         });
       }
+      print('✅ Imported ${listOfMaps.length} player maps');
 
       // Import points
       List<dynamic> importedPoints = gameData['point'];
       for (var roundPoints in importedPoints) {
         point.add(List<int>.from(roundPoints));
       }
+      print('✅ Imported ${point.length} rounds');
 
       // Import settings
       fOrc = gameData['fOrc'] ?? 0;
@@ -823,12 +876,14 @@ class ZiZackController extends ChangeNotifier {
       limitValue = gameData['limitValue'] ?? 0;
       showTotalScore = gameData['showTotalScore'] ?? false;
       inputMode = gameData['inputMode'] ?? 1;
+      print('✅ Imported settings');
 
       // Import setMoneyPoints
       if (gameData['setMoneyPoints'] != null) {
         Map<String, dynamic> moneyPoints = gameData['setMoneyPoints'];
         setMoneyPoints = moneyPoints
             .map((key, value) => MapEntry(int.parse(key), value.toString()));
+        print('✅ Imported setMoneyPoints');
       }
 
       // Rebuild calPoint
@@ -842,24 +897,30 @@ class ZiZackController extends ChangeNotifier {
           'hue': false,
         });
       }
+      print('✅ Rebuilt calPoint');
 
       print('📥 Import game từ QR thành công!');
       print('   Người chơi: ${listCharNew.length}');
       print('   Số ván đã chơi: ${point.length}');
 
       // Tạo session mới
+      print('🔄 Creating new game session...');
       await createNewGameSession();
 
       // LƯU session vào game history
+      print('💾 Saving current session...');
       await saveCurrentSession();
 
       // Refresh game history để hiển thị trong UI
+      print('🔄 Refreshing game history...');
       await refreshGameHistory();
 
       notifyListeners();
+      print('✅ importGameFromQR - COMPLETE');
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('❌ Lỗi khi import game từ QR: $e');
+      print('📍 Stack trace: $stackTrace');
       return false;
     }
   }
@@ -881,6 +942,7 @@ class ZiZackController extends ChangeNotifier {
         id: i,
         name: listCharNew[i],
         isCai: (i == 0), // 🎯 Người chơi đầu tiên là "cái" mặc định
+        isOut: false, // 🚪 Mới bắt đầu game, chưa ai out
       ));
     }
 
@@ -915,6 +977,8 @@ class ZiZackController extends ChangeNotifier {
     for (int i = 0; i < listOfMaps.length; i++) {
       if (i < currentSession!.players.length) {
         currentSession!.players[i].isCai = listOfMaps[i]['cai'] ?? false;
+        currentSession!.players[i].isOut =
+            listOfMaps[i]['isOut'] ?? false; // 🚪 Lưu trạng thái out
         currentSession!.players[i].currentPoint = listOfMaps[i]['point'] ?? '';
         currentSession!.players[i].roundPoints =
             List<int>.from(listOfMaps[i]['nowPoint'] ?? []);
@@ -1084,6 +1148,7 @@ class ZiZackController extends ChangeNotifier {
         Map<String, dynamic> currentMap = {
           'id': i,
           'cai': player.isCai,
+          'isOut': player.isOut, // 🚪 Restore trạng thái out
           'name': player.name,
           'point': player.currentPoint,
           'nowPoint': nowPointList,

@@ -61,10 +61,23 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen>
     });
 
     controller!.scannedDataStream.listen((scanData) async {
-      if (isProcessing) return;
+      print('📸 QR Scanned! Raw data type: ${scanData.code?.runtimeType}');
+
+      if (isProcessing) {
+        print('⏳ Already processing, ignoring scan');
+        return;
+      }
 
       final String? code = scanData.code;
-      if (code == null || code.isEmpty) return;
+
+      if (code == null || code.isEmpty) {
+        print('⚠️ QR code is null or empty');
+        return;
+      }
+
+      print('📥 QR Code length: ${code.length} characters');
+      print(
+          '📥 QR Code preview: ${code.substring(0, code.length > 100 ? 100 : code.length)}...');
 
       setState(() {
         isProcessing = true;
@@ -78,7 +91,10 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen>
       // Import game
       final gameController =
           Provider.of<ZiZackController>(context, listen: false);
+
+      print('🔄 Starting import...');
       bool success = await gameController.importGameFromQR(code);
+      print('✅ Import result: $success');
 
       if (!mounted) return;
 
@@ -111,6 +127,7 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen>
           ),
         );
       } else {
+        print('❌ Import failed - showing error dialog');
         showCustomAlert(
           context,
           type: AlertType.error,
@@ -273,11 +290,13 @@ class _ScanGameQRScreenState extends State<ScanGameQRScreen>
               borderRadius: 20,
               borderLength: 40,
               borderWidth: 6,
-              cutOutSize: 300,
+              cutOutSize: kIsWeb ? 350 : 300, // 🌐 Lớn hơn trên web
             ),
             // Thêm các cấu hình để cải thiện hiệu suất scan
             formatsAllowed: const [BarcodeFormat.qrcode],
+            cameraFacing: CameraFacing.back, // 🔧 Ưu tiên camera sau
             onPermissionSet: (ctrl, hasPermission) {
+              print('📷 Camera permission: $hasPermission');
               if (!hasPermission) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

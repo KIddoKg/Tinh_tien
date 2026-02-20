@@ -94,7 +94,11 @@ Future<void> showShareGameQRDialog(BuildContext context) async {
                     version: QrVersions.auto,
                     size: 250.0,
                     backgroundColor: Colors.white,
-                    errorCorrectionLevel: QrErrorCorrectLevel.M,
+                    errorCorrectionLevel:
+                        QrErrorCorrectLevel.H, // 🔧 Tăng lên HIGH cho web
+                    embeddedImageStyle: QrEmbeddedImageStyle(
+                      size: Size(40, 40),
+                    ),
                   ),
                 ),
                 SizedBox(height: 24),

@@ -5,6 +5,7 @@ class Player {
   final int id;
   final String name;
   bool isCai;
+  bool isOut; // 🚪 Player đã out khỏi game
   String currentPoint; // Điểm đang nhập
   List<int> roundPoints; // Điểm của từng ván
   int totalScore; // Tổng điểm
@@ -13,6 +14,7 @@ class Player {
     required this.id,
     required this.name,
     this.isCai = false,
+    this.isOut = false, // 🚪 Mặc định chưa out
     this.currentPoint = '',
     List<int>? roundPoints,
     this.totalScore = 0,
@@ -24,6 +26,7 @@ class Player {
       'id': id,
       'name': name,
       'isCai': isCai,
+      'isOut': isOut, // 🚪 Lưu trạng thái out
       'currentPoint': currentPoint,
       'roundPoints': roundPoints,
       'totalScore': totalScore,
@@ -36,6 +39,7 @@ class Player {
       id: map['id'] ?? 0,
       name: map['name'] ?? '',
       isCai: map['isCai'] ?? false,
+      isOut: map['isOut'] ?? false, // 🚪 Load trạng thái out
       currentPoint: map['currentPoint'] ?? '',
       roundPoints: List<int>.from(map['roundPoints'] ?? []),
       totalScore: map['totalScore'] ?? 0,
@@ -53,6 +57,7 @@ class Player {
     int? id,
     String? name,
     bool? isCai,
+    bool? isOut, // 🚪 Cho phép copy với isOut mới
     String? currentPoint,
     List<int>? roundPoints,
     int? totalScore,
@@ -61,6 +66,7 @@ class Player {
       id: id ?? this.id,
       name: name ?? this.name,
       isCai: isCai ?? this.isCai,
+      isOut: isOut ?? this.isOut, // 🚪 Copy isOut
       currentPoint: currentPoint ?? this.currentPoint,
       roundPoints: roundPoints ?? this.roundPoints,
       totalScore: totalScore ?? this.totalScore,

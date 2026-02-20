@@ -296,58 +296,152 @@ class _HomeZiZachState extends State<HomeZiZach> {
                               result.listCharNew.asMap().entries.map((entry) {
                             final int playerIndex = entry.key;
                             final String name = entry.value;
+                            final bool isOut = result.listOfMaps[playerIndex]
+                                    ['isOut'] ??
+                                false;
                             final int totalScore = result.point.isEmpty
                                 ? 0
                                 : calculateSumForEachList(
                                     result.point)[playerIndex];
 
-                            return Container(
-                              height: 60,
-                              width: 80,
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 2.0, vertical: 4.0),
-                              decoration: BoxDecoration(
-                                color: result.listOfMaps[playerIndex]['cai'] ==
-                                        false
-                                    ? AppColors.sixColor
-                                    : AppColors.primaryColor,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2.0,
-                                ),
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: Stack(
-                                children: [
-                                  // Tên chính ở giữa
-                                  Center(
-                                    child: Text(
-                                      name,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: AppColors.whiteBg,
-                                        fontWeight: FontWeight.w700,
+                            return GestureDetector(
+                              onLongPress: () {
+                                // Show confirmation dialog
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                      title: Row(
+                                        children: [
+                                          Icon(
+                                            isOut
+                                                ? Icons.person_add
+                                                : Icons.person_remove,
+                                            color: AppColors.primaryColor,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            isOut
+                                                ? 'Cho vào lại?'
+                                                : 'Cho ra khỏi game?',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      content: Text(
+                                        isOut
+                                            ? 'Bạn có muốn cho "$name" vào lại game không?\n\nNgười chơi sẽ xuất hiện trong danh sách cài điểm và tính điểm.'
+                                            : 'Bạn có muốn cho "$name" ra khỏi game không?\n\nNgười chơi sẽ bị xám và không còn trong danh sách cài điểm, tính điểm nữa (nhưng data cũ vẫn giữ nguyên).',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text(
+                                            'Hủy',
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            result.togglePlayerOut(
+                                                playerIndex, context);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isOut
+                                                ? Colors.green
+                                                : Colors.red[400],
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            isOut ? 'Vào lại' : 'Ra khỏi game',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              child: Container(
+                                height: 60,
+                                width: 80,
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 2.0, vertical: 4.0),
+                                decoration: BoxDecoration(
+                                  color: isOut
+                                      ? Colors.grey
+                                          .withOpacity(0.5) // 🚪 Xám nếu out
+                                      : (result.listOfMaps[playerIndex]
+                                                  ['cai'] ==
+                                              false
+                                          ? AppColors.sixColor
+                                          : AppColors.primaryColor),
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2.0,
                                   ),
-                                  // Tổng điểm nhỏ ở góc dưới phải
-                                  if (result.showTotalScore &&
-                                      result.point.isNotEmpty)
-                                    Positioned(
-                                      bottom: 2,
-                                      right: 4,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    // Tên chính ở giữa
+                                    Center(
                                       child: Text(
-                                        "$totalScore",
+                                        name,
                                         style: TextStyle(
-                                          fontSize: 10,
-                                          color: AppColors.whiteBg
-                                              .withOpacity(0.8),
-                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                          color: isOut
+                                              ? Colors.grey
+                                                  .shade600 // 🚪 Text xám nếu out
+                                              : AppColors.whiteBg,
+                                          fontWeight: FontWeight.w700,
+                                          decoration: isOut
+                                              ? TextDecoration.lineThrough
+                                              : null, // 🚪 Gạch ngang
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    // Tổng điểm nhỏ ở góc dưới phải
+                                    if (result.showTotalScore &&
+                                        result.point.isNotEmpty)
+                                      Positioned(
+                                        bottom: 2,
+                                        right: 4,
+                                        child: Text(
+                                          "$totalScore",
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: isOut
+                                                ? Colors.grey.shade600
+                                                : AppColors.whiteBg
+                                                    .withOpacity(0.8),
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                ],
+                                  ],
+                                ),
                               ),
                             );
                           }).toList(),
@@ -374,6 +468,9 @@ class _HomeZiZachState extends State<HomeZiZach> {
                                       .map((playerEntry) {
                                     final int playerIndex = playerEntry.key;
                                     final int score = vanScores[playerIndex];
+                                    final bool isOut = result
+                                            .listOfMaps[playerIndex]['isOut'] ??
+                                        false;
 
                                     return Container(
                                       height: 60,
@@ -381,8 +478,11 @@ class _HomeZiZachState extends State<HomeZiZach> {
                                       margin: const EdgeInsets.symmetric(
                                           horizontal: 2.0, vertical: 4.0),
                                       decoration: BoxDecoration(
-                                        color:
-                                            AppColors.sixColor.withOpacity(0.7),
+                                        color: isOut
+                                            ? Colors.grey.withOpacity(
+                                                0.3) // 🚪 Xám nếu out
+                                            : AppColors.sixColor
+                                                .withOpacity(0.7),
                                         border: Border.all(
                                           color: Colors.white,
                                           width: 2.0,
@@ -400,8 +500,10 @@ class _HomeZiZachState extends State<HomeZiZach> {
                                               "${vanIndex + 1}",
                                               style: TextStyle(
                                                 fontSize: 10,
-                                                color: AppColors.whiteBg
-                                                    .withOpacity(0.6),
+                                                color: isOut
+                                                    ? Colors.grey.shade600
+                                                    : AppColors.whiteBg
+                                                        .withOpacity(0.6),
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
@@ -412,7 +514,9 @@ class _HomeZiZachState extends State<HomeZiZach> {
                                               score == 0 ? "0" : "$score",
                                               style: TextStyle(
                                                 fontSize: 16,
-                                                color: AppColors.whiteBg,
+                                                color: isOut
+                                                    ? Colors.grey.shade600
+                                                    : AppColors.whiteBg,
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),

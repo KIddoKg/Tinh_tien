@@ -71,66 +71,82 @@ Future<void> showPopupSetPointOwn(BuildContext context) {
                           child: SingleChildScrollView(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Column(
-                              children: List.generate(
-                                (result.listCharNew.length / 3).ceil(),
-                                (rowIndex) {
-                                  return Padding(
-                                    padding:
-                                        const EdgeInsets.only(bottom: 12.0),
-                                    child: Row(
-                                      children: [
-                                        // Player 1 (cột 1)
-                                        Expanded(
-                                          child: _buildPlayerCard(
-                                            context,
-                                            setState,
-                                            result,
-                                            rowIndex * 3,
-                                            tempPoints,
-                                          ),
+                            child: Builder(
+                              builder: (context) {
+                                // 🚪 Filter: Chỉ lấy player chưa out
+                                List<int> activePlayers = [];
+                                for (int i = 0;
+                                    i < result.listCharNew.length;
+                                    i++) {
+                                  if (result.listOfMaps[i]['isOut'] != true) {
+                                    activePlayers.add(i);
+                                  }
+                                }
+
+                                return Column(
+                                  children: List.generate(
+                                    (activePlayers.length / 3).ceil(),
+                                    (rowIndex) {
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 12.0),
+                                        child: Row(
+                                          children: [
+                                            // Player 1 (cột 1)
+                                            Expanded(
+                                              child: _buildPlayerCard(
+                                                context,
+                                                setState,
+                                                result,
+                                                activePlayers[rowIndex * 3],
+                                                tempPoints,
+                                              ),
+                                            ),
+                                            // Spacing
+                                            if (rowIndex * 3 + 1 <
+                                                activePlayers.length)
+                                              const SizedBox(width: 8),
+                                            // Player 2 (cột 2)
+                                            if (rowIndex * 3 + 1 <
+                                                activePlayers.length)
+                                              Expanded(
+                                                child: _buildPlayerCard(
+                                                  context,
+                                                  setState,
+                                                  result,
+                                                  activePlayers[
+                                                      rowIndex * 3 + 1],
+                                                  tempPoints,
+                                                ),
+                                              )
+                                            else
+                                              Expanded(child: Container()),
+                                            // Spacing
+                                            if (rowIndex * 3 + 2 <
+                                                activePlayers.length)
+                                              const SizedBox(width: 8),
+                                            // Player 3 (cột 3)
+                                            if (rowIndex * 3 + 2 <
+                                                activePlayers.length)
+                                              Expanded(
+                                                child: _buildPlayerCard(
+                                                  context,
+                                                  setState,
+                                                  result,
+                                                  activePlayers[
+                                                      rowIndex * 3 + 2],
+                                                  tempPoints,
+                                                ),
+                                              )
+                                            else
+                                              Expanded(child: Container()),
+                                          ],
                                         ),
-                                        // Spacing
-                                        if (rowIndex * 3 + 1 <
-                                            result.listCharNew.length)
-                                          const SizedBox(width: 8),
-                                        // Player 2 (cột 2)
-                                        if (rowIndex * 3 + 1 <
-                                            result.listCharNew.length)
-                                          Expanded(
-                                            child: _buildPlayerCard(
-                                              context,
-                                              setState,
-                                              result,
-                                              rowIndex * 3 + 1,
-                                              tempPoints,
-                                            ),
-                                          )
-                                        else
-                                          Expanded(child: Container()),
-                                        // Spacing
-                                        if (rowIndex * 3 + 2 <
-                                            result.listCharNew.length)
-                                          const SizedBox(width: 8),
-                                        // Player 3 (cột 3)
-                                        if (rowIndex * 3 + 2 <
-                                            result.listCharNew.length)
-                                          Expanded(
-                                            child: _buildPlayerCard(
-                                              context,
-                                              setState,
-                                              result,
-                                              rowIndex * 3 + 2,
-                                              tempPoints,
-                                            ),
-                                          )
-                                        else
-                                          Expanded(child: Container()),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -165,7 +181,7 @@ Future<void> showPopupSetPointOwn(BuildContext context) {
                                         // Mở popup Cài điểm
                                         // await showPopupSetPoint(context);
                                         Provider.of<ZiZackController>(context,
-                                            listen: false)
+                                                listen: false)
                                             .setCai(context);
                                       },
                                     ),
